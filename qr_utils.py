@@ -42,7 +42,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
     Parse QR code string to extract patient information
     
     Format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi"
-    Example: "058090007045|264362146|Nguyễn Gio An|20041990|Nam|Thôn La Vang 1, Quảng Sơn, Ninh Sơn, Ninh Thuận"
+    Example: "0580xxxxxxxxx|2xxxxxx|Nguyễn Văn An|20041999|Nam|Quận 2, Hồ Chí Minh"
     """
     try:
         # Split the QR string by pipe character
@@ -108,7 +108,7 @@ def generate_password_from_qr(qr_info: QRPatientInfo) -> str:
 
 if __name__ == "__main__":
     # Test the parsing function
-    test_qr = "058090007045|264362146|Nguyễn Gio An|20041990|Nam|Thôn La Vang 1, Quảng Sơn, Ninh Sơn, Ninh Thuận"
+    test_qr = "0580xxxxxxxxx|2xxxxxx|Nguyễn Văn An|20041999|Nam|Quận 2, Hồ Chí Minh"
     
     print("🧪 Testing QR code parsing...")
     qr_info = parse_qr_code(test_qr)

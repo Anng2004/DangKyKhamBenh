@@ -46,14 +46,9 @@ USERNAME = 'your-username'
 PASSWORD = 'your-password'
 ```
 
-### 4. Khởi tạo Database
+### 4. Khởi tạo Database và Import dữ liệu mẫu
 ```bash
-# Kích hoạt virtual environment trước
-source venv/bin/activate  # Linux/macOS
-# hoặc
-venv\Scripts\activate     # Windows
-
-# Chạy script khởi tạo
+# Chạy script import dữ liệu (sẽ tự động init database)
 python import_data.py
 ```
 
@@ -61,6 +56,12 @@ python import_data.py
 ```bash
 python app.py
 ```
+
+**Lưu ý**: Script tự động sẽ:
+- ✅ Tạo database nếu chưa tồn tại
+- ✅ Khởi tạo toàn bộ schema với foreign keys
+- ✅ Import dữ liệu mẫu (phòng khám, dịch vụ, bác sĩ)
+- ✅ Sẵn sàng cho tính năng QR code
 
 ## 🔧 Cài Đặt Thủ Công
 
@@ -119,7 +120,7 @@ HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql17
 
 ### Định dạng QR Code
 ```
-058090007045|264362146|Nguyễn Gio An|20041990|Nam|Thôn La Vang 1, Quảng Sơn, Ninh Sơn, Ninh Thuận
+0580xxxxxxxxx|2xxxxxx|Nguyễn Văn An|20041999|Nam|Quận 2, Hồ Chí Minh
 ```
 
 ## 📁 Cấu Trúc Project
