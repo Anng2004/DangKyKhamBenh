@@ -112,16 +112,43 @@ HOMEBREW_NO_ENV_FILTERING=1 ACCEPT_EULA=Y brew install msodbcsql17
 
 ### Quét QR Code
 1. Vào menu "Quản lý Tiếp nhận" → "Quét QR code đăng ký"
-2. Nhập chuỗi QR theo định dạng: 
-   ```
-   CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi
-   ```
+2. Nhập chuỗi QR theo các định dạng được hỗ trợ (xem bên dưới)
 3. Hệ thống sẽ tự động tạo bệnh nhân và tài khoản
 
 ### Định dạng QR Code
+
+**🔥 Tính năng mới: Phân tích thông minh CCCD 12 số**
+
+Hệ thống hỗ trợ nhiều định dạng QR code:
+
+#### **1. Định dạng đầy đủ:**
 ```
-0580xxxxxxxxx|2xxxxxx|Nguyễn Văn An|20041999|Nam|Quận 2, Hồ Chí Minh
+CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi
 ```
+Ví dụ:
+```
+058186000028|2345678|Nguyễn Thị Linh|15071986|Nữ|Ninh Thuận
+```
+
+#### **2. Định dạng tối thiểu (✨ Mới):**
+```
+CCCD||HoTen|||
+```
+Ví dụ:
+```
+058186000028||Nguyễn Thị Linh|||
+```
+
+**🧠 Phân tích thông minh:** Khi thông tin QR không đầy đủ, hệ thống sẽ **tự động phân tích số CCCD 12 chữ số** để trích xuất:
+- 🗺️ **Tỉnh/TP khai sinh** (3 số đầu)
+- 👫 **Giới tính** (số thứ 4: 0/2=Nam, 1/3=Nữ)  
+- 🎂 **Năm sinh** (số thứ 5-6 + thế kỷ từ số thứ 4)
+
+**Ví dụ CCCD `058186000028`:**
+- `058`: Ninh Thuận
+- `1`: Nữ, thế kỷ 20 (1900-1999)
+- `86`: Năm sinh 1986
+- `000028`: Số định danh cá nhân
 
 ## 📁 Cấu Trúc Project
 
