@@ -1,0 +1,9 @@
+# Core dependencies
+pyodbc>=4.0.35
+
+# Optional dependencies for Excel export
+pandas>=1.5.0
+openpyxl>=3.0.10
+
+# Python version compatibility
+typing-extensions>=4.0.0; python_version<"3.10"
