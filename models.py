@@ -42,12 +42,13 @@ class PhongKham(AbsEntity):
             return f"[PhongKham: {self._ma_phong} - {self._ten_phong} - BS: {self.ten_bac_si}]"
         else:
             return f"[PhongKham: {self._ma_phong} - {self._ten_phong}]"
-            return f"[PhongKham: {self._ma_phong} - {self._ten_phong}]"
 
     @property
     def pk_id(self) -> str: return self._pk_id
     @property
     def ma_phong(self) -> str: return self._ma_phong
+    @property
+    def ten_phong(self) -> str: return self._ten_phong
     @property
     def bac_si(self) -> Optional['BacSi']: return self._bac_si
 
@@ -64,6 +65,10 @@ class DichVu(AbsEntity):
 
     @property
     def dv_id(self) -> str: return self._dv_id
+    @property
+    def ma_dv(self) -> str: return self._ma_dv
+    @property
+    def ten_dv(self) -> str: return self._ten_dv
     @property
     def gia(self) -> int: return self._gia
 
@@ -115,6 +120,52 @@ class BenhNhan(AbsEntity):
     def pid(self) -> str: return self._pid
     @property
     def so_cccd(self) -> str: return self._so_cccd
+    @property
+    def nam_sinh(self) -> int: return self._nam_sinh
+    @property
+    def ho_ten(self) -> str: return self._ho_ten
+    @property
+    def gioi_tinh(self) -> str: return self._gioi_tinh
+    
+    @staticmethod
+    def extract_nam_sinh_from_date(ngay_sinh_str: str) -> int:
+        """Extract birth year from various date formats"""
+        try:
+            if not ngay_sinh_str:
+                return 0
+            
+            ngay_sinh_clean = ngay_sinh_str.strip()
+            
+            # Format 1: DDMMYYYY (8 digits)
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 8:
+                return int(ngay_sinh_clean[4:8])
+            
+            # Format 2: DD/MM/YYYY
+            if '/' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('/')
+                if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
+                    return int(parts[2])
+            
+            # Format 3: DD-MM-YYYY
+            if '-' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('-')
+                if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
+                    return int(parts[2])
+            
+            # Format 4: YYYY only (4 digits)
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
+                return int(ngay_sinh_clean)
+            
+            # Try to extract 4-digit year from any position in the string
+            import re
+            year_match = re.search(r'\b(19|20)\d{2}\b', ngay_sinh_clean)
+            if year_match:
+                return int(year_match.group())
+            
+            return 0
+            
+        except (ValueError, IndexError, AttributeError):
+            return 0
 
 
 class TiepNhan(AbsEntity):
@@ -143,9 +194,8 @@ class TiepNhan(AbsEntity):
 
 # ===== Domain service =====
 class ChiPhiKham:
-    """Tính chi phí dựa trên dịch vụ + phụ phí theo phòng (giả lập)."""
+    """Tính chi phí dựa trên dịch vụ."""
     @staticmethod
     def tinh_chi_phi(dv: DichVu, pk: PhongKham) -> int:
-        # Phụ phí phòng khám chuyên khoa 20k nếu mã phòng không phải PK001
-        phu_phi = 20000 if pk._ma_phong != "PK001" else 0
-        return dv.gia + phu_phi
+        # Chỉ tính chi phí dịch vụ, không có phụ phí
+        return dv.gia

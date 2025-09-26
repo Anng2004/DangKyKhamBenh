@@ -185,39 +185,60 @@ def init_db(seed: bool = True) -> None:
     # Tạo Foreign Keys
     print("  🔗 Tạo Foreign Key constraints...")
     
-    # FK cho PhongKham -> BacSi  
+    # Drop existing FK constraints first (if any)
     cur.execute("""
-    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_PhongKham_BacSi')
+    IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_PhongKham_BacSi')
+    ALTER TABLE PhongKham DROP CONSTRAINT FK_PhongKham_BacSi
+    """)
+    
+    cur.execute("""
+    IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_BenhNhan')
+    ALTER TABLE TiepNhan DROP CONSTRAINT FK_TiepNhan_BenhNhan
+    """)
+    
+    cur.execute("""
+    IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_DichVu')
+    ALTER TABLE TiepNhan DROP CONSTRAINT FK_TiepNhan_DichVu
+    """)
+    
+    cur.execute("""
+    IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_PhongKham')
+    ALTER TABLE TiepNhan DROP CONSTRAINT FK_TiepNhan_PhongKham
+    """)
+    
+    cur.execute("""
+    IF EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_BacSi')
+    ALTER TABLE TiepNhan DROP CONSTRAINT FK_TiepNhan_BacSi
+    """)
+    
+    # FK cho PhongKham -> BacSi (NO ACTION - không cho xóa bác sĩ khi còn phòng khám)
+    cur.execute("""
     ALTER TABLE PhongKham ADD CONSTRAINT FK_PhongKham_BacSi 
-    FOREIGN KEY (BS_ID) REFERENCES BacSi(BS_ID)
+    FOREIGN KEY (BS_ID) REFERENCES BacSi(BS_ID) ON DELETE NO ACTION
     """)
     
-    # FK cho TiepNhan -> BenhNhan
+    # FK cho TiepNhan -> BenhNhan (NO ACTION - bảo vệ tính toàn vẹn dữ liệu)
     cur.execute("""
-    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_BenhNhan')
     ALTER TABLE TiepNhan ADD CONSTRAINT FK_TiepNhan_BenhNhan
-    FOREIGN KEY (BN_ID) REFERENCES BenhNhan(BN_ID) ON DELETE CASCADE
+    FOREIGN KEY (BN_ID) REFERENCES BenhNhan(BN_ID) ON DELETE NO ACTION
     """)
     
-    # FK cho TiepNhan -> DichVu
+    # FK cho TiepNhan -> DichVu (NO ACTION - không cho xóa dịch vụ khi còn tiếp nhận)
     cur.execute("""
-    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_DichVu')
     ALTER TABLE TiepNhan ADD CONSTRAINT FK_TiepNhan_DichVu
-    FOREIGN KEY (Dv_ID) REFERENCES DM_DichVuKyThuat(dv_id)
+    FOREIGN KEY (Dv_ID) REFERENCES DM_DichVuKyThuat(dv_id) ON DELETE NO ACTION
     """)
     
-    # FK cho TiepNhan -> PhongKham
+    # FK cho TiepNhan -> PhongKham (NO ACTION - không cho xóa phòng khám khi còn tiếp nhận)
     cur.execute("""
-    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_PhongKham')
     ALTER TABLE TiepNhan ADD CONSTRAINT FK_TiepNhan_PhongKham
-    FOREIGN KEY (PK_ID) REFERENCES PhongKham(PK_ID)
+    FOREIGN KEY (PK_ID) REFERENCES PhongKham(PK_ID) ON DELETE NO ACTION
     """)
     
-    # FK cho TiepNhan -> BacSi
+    # FK cho TiepNhan -> BacSi (NO ACTION - không cho xóa bác sĩ khi còn tiếp nhận)
     cur.execute("""
-    IF NOT EXISTS (SELECT * FROM sys.foreign_keys WHERE name = 'FK_TiepNhan_BacSi')
     ALTER TABLE TiepNhan ADD CONSTRAINT FK_TiepNhan_BacSi
-    FOREIGN KEY (BS_ID) REFERENCES BacSi(BS_ID)
+    FOREIGN KEY (BS_ID) REFERENCES BacSi(BS_ID) ON DELETE NO ACTION
     """)
 
     if seed:

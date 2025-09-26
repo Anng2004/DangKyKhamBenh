@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""QR Code utilities for patient registration with CCCD analysis"""
 
 from dataclasses import dataclass
 from typing import Optional, Tuple
 import re
 from datetime import datetime
 
-# Mã tỉnh thành phố
+# Mã tỉnh thành phố (cũ - trước sắp xếp hành chính)
 PROVINCE_CODES = {
     '001': 'Hà Nội',
     '002': 'Hà Giang', '004': 'Cao Bằng', '006': 'Bắc Kạn', '008': 'Tuyên Quang',
@@ -27,7 +26,87 @@ PROVINCE_CODES = {
     '095': 'Bạc Liêu', '096': 'Cà Mau'
 }
 
-def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int]]:
+# Mapping hành chính mới theo NQ 202/2025/QH15
+ADMIN_REORGANIZATION = {
+    "merged": [
+        {"new": "Tuyên Quang", "includes": ["Hà Giang", "Tuyên Quang"]},
+        {"new": "Lào Cai", "includes": ["Lào Cai", "Yên Bái"]},
+        {"new": "Thái Nguyên", "includes": ["Bắc Kạn", "Thái Nguyên"]},
+        {"new": "Phú Thọ", "includes": ["Hòa Bình", "Vĩnh Phúc", "Phú Thọ"]},
+        {"new": "Bắc Ninh", "includes": ["Bắc Giang", "Bắc Ninh"]},
+        {"new": "Hưng Yên", "includes": ["Thái Bình", "Hưng Yên"]},
+        {"new": "Thành phố Hải Phòng", "includes": ["Hải Dương", "Thành phố Hải Phòng"]},
+        {"new": "Ninh Bình", "includes": ["Hà Nam", "Ninh Bình", "Nam Định"]},
+        {"new": "Quảng Trị", "includes": ["Quảng Bình", "Quảng Trị"]},
+        {"new": "Thành phố Đà Nẵng", "includes": ["Quảng Nam", "Thành phố Đà Nẵng"]},
+        {"new": "Quảng Ngãi", "includes": ["Quảng Ngãi", "Kon Tum"]},
+        {"new": "Gia Lai", "includes": ["Gia Lai", "Bình Định"]},
+        {"new": "Đắk Lắk", "includes": ["Phú Yên", "Đắk Lắk"]},
+        {"new": "Khánh Hòa", "includes": ["Khánh Hòa", "Ninh Thuận"]},
+        {"new": "Lâm Đồng", "includes": ["Đắk Nông", "Lâm Đồng", "Bình Thuận"]},
+        {"new": "Thành phố Hồ Chí Minh", "includes": ["Bình Dương", "Thành phố Hồ Chí Minh", "Bà Rịa - Vũng Tàu"]},
+        {"new": "Đồng Nai", "includes": ["Bình Phước", "Đồng Nai"]},
+        {"new": "Tây Ninh", "includes": ["Long An", "Tây Ninh"]},
+        {"new": "Thành phố Cần Thơ", "includes": ["Sóc Trăng", "Hậu Giang", "Thành phố Cần Thơ"]},
+        {"new": "Vĩnh Long", "includes": ["Bến Tre", "Vĩnh Long", "Trà Vinh"]},
+        {"new": "Đồng Tháp", "includes": ["Tiền Giang", "Đồng Tháp"]},
+        {"new": "Cà Mau", "includes": ["Bạc Liêu", "Cà Mau"]},
+        {"new": "An Giang", "includes": ["Kiên Giang", "An Giang"]}
+    ],
+    "unchanged": [
+        "Thành phố Hà Nội", "Cao Bằng", "Điện Biên", "Hà Tĩnh",
+        "Lai Châu", "Lạng Sơn", "Nghệ An", "Quảng Ninh",
+        "Thanh Hóa", "Sơn La", "Thành phố Huế"
+    ]
+}
+
+def get_new_province_from_old(old_province: str) -> str:
+    """
+    Mapping tỉnh cũ sang tỉnh mới theo NQ 202/2025/QH15
+    
+    Args:
+        old_province: Tên tỉnh cũ
+        
+    Returns:
+        Tên tỉnh mới sau sắp xếp
+    """
+    if not old_province:
+        return old_province
+        
+    # Kiểm tra tỉnh không đổi
+    if old_province in ADMIN_REORGANIZATION['unchanged']:
+        return old_province
+    
+    # Xử lý các trường hợp đặc biệt
+    name_mappings = {
+        'Hà Nội': 'Thành phố Hà Nội',
+        'TP.Hồ Chí Minh': 'Thành phố Hồ Chí Minh',
+        'Hải Phòng': 'Thành phố Hải Phòng',
+        'Đà Nẵng': 'Thành phố Đà Nẵng',
+        'Cần Thơ': 'Thành phố Cần Thơ',
+        'Thừa Thiên Huế': 'Thành phố Huế'
+    }
+    
+    mapped_name = name_mappings.get(old_province, old_province)
+    if mapped_name in ADMIN_REORGANIZATION['unchanged']:
+        return mapped_name
+    
+    # Tìm trong danh sách sáp nhập
+    for merged in ADMIN_REORGANIZATION['merged']:
+        if mapped_name in merged['includes']:
+            return merged['new']
+        # Kiểm tra các biến thể tên
+        for include in merged['includes']:
+            if (old_province == include or 
+                old_province == include.replace('Thành phố ', '') or
+                old_province == include.replace('TP.', '') or
+                f'Thành phố {old_province}' == include or
+                f'TP.{old_province}' == include):
+                return merged['new']
+    
+    return old_province  # Trả về tên cũ nếu không tìm thấy
+
+def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int], Optional[str]]:
     """
     Phân tích số CCCD 12 chữ số để trích xuất thông tin
     
@@ -35,15 +114,18 @@ def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int]
         cccd: Số CCCD 12 chữ số (VD: 079215000001)
     
     Returns:
-        Tuple[province, gender, birth_year] hoặc (None, None, None) nếu không hợp lệ
+        Tuple[province_old, gender, birth_year, province_new] hoặc (None, None, None, None) nếu không hợp lệ
     """
     if not cccd or len(cccd) != 12 or not cccd.isdigit():
-        return None, None, None
+        return None, None, None, None
     
     try:
         # 3 số đầu: mã tỉnh
         province_code = cccd[:3]
-        province = PROVINCE_CODES.get(province_code)
+        province_old = PROVINCE_CODES.get(province_code)
+        
+        # Mapping sang tỉnh mới
+        province_new = get_new_province_from_old(province_old) if province_old else None
         
         # Số thứ 4: mã giới tính và thế kỷ
         gender_code = cccd[3]
@@ -60,16 +142,16 @@ def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int]
             gender = 'Nữ'
             century_base = 2000
         else:
-            return None, None, None
+            return None, None, None, None
         
         # 2 số tiếp theo: năm sinh (2 chữ số cuối)
         year_suffix = int(cccd[4:6])
         birth_year = century_base + year_suffix
         
-        return province, gender, birth_year
+        return province_old, gender, birth_year, province_new
         
     except (ValueError, IndexError):
-        return None, None, None
+        return None, None, None, None
 
 @dataclass
 class QRPatientInfo:
@@ -82,28 +164,82 @@ class QRPatientInfo:
     dia_chi: str
     
     def get_nam_sinh(self) -> int:
-        """Convert ngay_sinh (DDMMYYYY) to year"""
+        """Convert ngay_sinh to year (automatically extracts from date formats)"""
         try:
-            if len(self.ngay_sinh) == 8:
-                return int(self.ngay_sinh[4:8])
-            elif self.ngay_sinh.isdigit() and len(self.ngay_sinh) == 4:
-                return int(self.ngay_sinh)
+            if not self.ngay_sinh:
+                return 0
+            
+            # Handle various date formats
+            ngay_sinh_clean = self.ngay_sinh.strip()
+            
+            # Format 1: DDMMYYYY (8 digits)
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 8:
+                return int(ngay_sinh_clean[4:8])
+            
+            # Format 2: DD/MM/YYYY
+            if '/' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('/')
+                if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
+                    return int(parts[2])
+            
+            # Format 3: DD-MM-YYYY
+            if '-' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('-')
+                if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
+                    return int(parts[2])
+            
+            # Format 4: YYYY only (4 digits)
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
+                return int(ngay_sinh_clean)
+            
+            # Try to extract 4-digit year from any position in the string
+            import re
+            year_match = re.search(r'\b(19|20)\d{2}\b', ngay_sinh_clean)
+            if year_match:
+                return int(year_match.group())
+            
+            print(f"⚠️  Không thể trích xuất năm sinh từ: {ngay_sinh_clean}")
             return 0
-        except:
+            
+        except (ValueError, IndexError, AttributeError) as e:
+            print(f"⚠️  Lỗi khi trích xuất năm sinh từ '{self.ngay_sinh}': {e}")
             return 0
     
     def get_formatted_date(self) -> str:
-        """Convert ngay_sinh to formatted date string"""
+        """Convert ngay_sinh to formatted date string (DD/MM/YYYY)"""
         try:
-            if len(self.ngay_sinh) == 8:
-                day = self.ngay_sinh[:2]
-                month = self.ngay_sinh[2:4]
-                year = self.ngay_sinh[4:8]
+            if not self.ngay_sinh:
+                return ""
+            
+            ngay_sinh_clean = self.ngay_sinh.strip()
+            
+            # Format 1: DDMMYYYY (8 digits) -> DD/MM/YYYY
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 8:
+                day = ngay_sinh_clean[:2]
+                month = ngay_sinh_clean[2:4]
+                year = ngay_sinh_clean[4:8]
                 return f"{day}/{month}/{year}"
-            elif self.ngay_sinh.isdigit() and len(self.ngay_sinh) == 4:
-                return f"01/01/{self.ngay_sinh}"  # Default to Jan 1st if only year
+            
+            # Format 2: DD/MM/YYYY (already formatted)
+            if '/' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('/')
+                if len(parts) == 3 and len(parts[0]) == 2 and len(parts[1]) == 2 and len(parts[2]) == 4:
+                    return ngay_sinh_clean
+            
+            # Format 3: DD-MM-YYYY -> DD/MM/YYYY
+            if '-' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
+                parts = ngay_sinh_clean.split('-')
+                if len(parts) == 3 and len(parts[0]) == 2 and len(parts[1]) == 2 and len(parts[2]) == 4:
+                    return f"{parts[0]}/{parts[1]}/{parts[2]}"
+            
+            # Format 4: YYYY only -> 01/01/YYYY (default to Jan 1st)
+            if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
+                return f"01/01/{ngay_sinh_clean}"
+            
+            # If can't parse, return as is
             return self.ngay_sinh
-        except:
+            
+        except (ValueError, IndexError, AttributeError):
             return self.ngay_sinh
 
 def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
@@ -111,10 +247,22 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
     Parse QR code string to extract patient information
     
     Supports multiple formats:
-    1. Full format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi"
-    2. Minimal format: "CCCD||HoTen|||DiaChi" (auto-extract from CCCD)
+    1. New format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi|NgayCap" (NgayCap is ignored)
+    2. Legacy format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi"
+    3. Minimal format: "CCCD||HoTen|||DiaChi" (auto-extract from CCCD)
     
-    Example: "058186000028|2345678|Nguyễn Thị Test|15071986|Nữ|Ninh Thuận"
+    Supported date formats for NgaySinh:
+    - DDMMYYYY (e.g., 15071986)
+    - DD/MM/YYYY (e.g., 15/07/1986)
+    - DD-MM-YYYY (e.g., 15-07-1986)
+    - YYYY (e.g., 1986)
+    
+    Birth year (nam_sinh) is automatically extracted from NgaySinh regardless of format.
+    
+    Examples:
+    - "058186000028|2345678|Nguyễn Thị Test|15071986|Nữ|Ninh Thuận|15062020" (new format)
+    - "058186000028|2345678|Nguyễn Thị Test|15/07/1986|Nữ|Ninh Thuận" (with DD/MM/YYYY)
+    - "058186000028||Nguyễn Thị Test|||Ninh Thuận" (minimal format)
     """
     try:
         # Split the QR string by pipe character
@@ -124,16 +272,23 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
             print(f"❌ QR code không đúng định dạng. Cần ít nhất CCCD|CMND|HoTen")
             return None
         
-        # Pad parts to 6 elements if needed
+        # Handle both new format (7 parts) and legacy format (6 parts)
+        # Pad parts to at least 6 elements if needed
         while len(parts) < 6:
             parts.append('')
         
+        # Extract the core 6 parts (ignore NgayCap if present)
         cccd = parts[0].strip()
         cmnd = parts[1].strip()
         ho_ten = parts[2].strip()
         ngay_sinh = parts[3].strip() 
         gioi_tinh = parts[4].strip()
         dia_chi = parts[5].strip()
+        
+        # Ignore NgayCap (parts[6]) if present
+        if len(parts) > 6:
+            ngay_cap = parts[6].strip()
+            print(f"ℹ️  Đã bỏ qua Ngày cấp: {ngay_cap}")
         
         # Validate CCCD (should be 12 digits)
         if not re.match(r'^\d{12}$', cccd):
@@ -145,7 +300,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
             return None
         
         # Auto-extract information from CCCD if missing
-        extracted_province, extracted_gender, extracted_year = analyze_cccd(cccd)
+        extracted_province_old, extracted_gender, extracted_year, extracted_province_new = analyze_cccd(cccd)
         
         # Use extracted gender if not provided in QR
         if not gioi_tinh and extracted_gender:
@@ -158,19 +313,28 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
             print(f"✅ Phân tích CCCD: Năm sinh = {extracted_year}")
         
         # Use extracted province for address if address is empty
-        if not dia_chi and extracted_province:
-            dia_chi = extracted_province
-            print(f"✅ Phân tích CCCD: Tỉnh/TP = {extracted_province}")
+        if not dia_chi and extracted_province_new:
+            dia_chi = extracted_province_new
+            print(f"✅ Phân tích CCCD: Tỉnh/TP = {extracted_province_new} (mới)")
+        elif not dia_chi and extracted_province_old:
+            dia_chi = extracted_province_old
+            print(f"✅ Phân tích CCCD: Tỉnh/TP = {extracted_province_old} (cũ)")
         
         # Validate final data
         if gioi_tinh and gioi_tinh not in ['Nam', 'Nữ']:
             print(f"❌ Giới tính không hợp lệ: {gioi_tinh} (phải là 'Nam' hoặc 'Nữ')")
             return None
         
-        # Validate birth date if provided (should be 8 digits DDMMYYYY or 4 digits YYYY)
+        # Validate birth date if provided (support multiple formats)
         if ngay_sinh:
-            if not (re.match(r'^\d{8}$', ngay_sinh) or re.match(r'^\d{4}$', ngay_sinh)):
-                print(f"❌ Ngày sinh không hợp lệ: {ngay_sinh} (phải là DDMMYYYY hoặc YYYY)")
+            valid_formats = [
+                r'^\d{8}$',          # DDMMYYYY
+                r'^\d{4}$',          # YYYY
+                r'^\d{2}/\d{2}/\d{4}$',  # DD/MM/YYYY
+                r'^\d{2}-\d{2}-\d{4}$'   # DD-MM-YYYY
+            ]
+            if not any(re.match(pattern, ngay_sinh) for pattern in valid_formats):
+                print(f"❌ Ngày sinh không hợp lệ: {ngay_sinh} (phải là DDMMYYYY, DD/MM/YYYY, DD-MM-YYYY hoặc YYYY)")
                 return None
         
         return QRPatientInfo(
@@ -202,7 +366,11 @@ def display_patient_info(qr_info: QRPatientInfo) -> None:
     print(f"👤 Họ tên: {qr_info.ho_ten}")
     
     if qr_info.ngay_sinh:
-        print(f"📅 Ngày sinh: {qr_info.get_formatted_date()}")
+        formatted_date = qr_info.get_formatted_date()
+        nam_sinh = qr_info.get_nam_sinh()
+        print(f"📅 Ngày sinh: {formatted_date}")
+        if nam_sinh > 0:
+            print(f"🎂 Năm sinh (tự động): {nam_sinh}")
     else:
         print("📅 Ngày sinh: (không có)")
     
@@ -218,9 +386,11 @@ def display_patient_info(qr_info: QRPatientInfo) -> None:
     
     # Hiển thị thông tin phân tích từ CCCD
     print("\n📊 PHÂN TÍCH CCCD:")
-    province, gender, birth_year = analyze_cccd(qr_info.cccd)
-    if province:
-        print(f"   🗺️  Nơi khai sinh: {province}")
+    province_old, gender, birth_year, province_new = analyze_cccd(qr_info.cccd)
+    if province_old:
+        print(f"   🗺️  Nơi khai sinh (cũ): {province_old}")
+    if province_new:
+        print(f"   🗺️  Nơi khai sinh (mới): {province_new}")
     if gender:
         print(f"   👫 Giới tính (theo CCCD): {gender}")
     if birth_year:
@@ -237,46 +407,3 @@ def generate_password_from_qr(qr_info: QRPatientInfo) -> str:
     """Generate password from QR patient info"""
     # Use birth date as password for simplicity
     return qr_info.ngay_sinh
-
-if __name__ == "__main__":
-    # Test cases for QR code parsing with CCCD analysis
-    
-    print("🧪 Testing QR code parsing with CCCD analysis...")
-    print("\n" + "="*80)
-    
-    # Test Case 1: Full QR code format
-    print("TEST 1: QR đầy đủ thông tin")
-    test_qr1 = "079215000001||Nguyễn Văn Test|15072015|Nam|TP.Hồ Chí Minh"
-    qr_info1 = parse_qr_code(test_qr1)
-    if qr_info1:
-        display_patient_info(qr_info1)
-    
-    print("\n" + "="*80)
-    
-    # Test Case 2: Minimal QR code (auto-extract from CCCD)
-    print("TEST 2: QR tối thiểu, tự phân tích từ CCCD")  
-    test_qr2 = "058186000028||Nguyễn Thị Linh|||"
-    qr_info2 = parse_qr_code(test_qr2)
-    if qr_info2:
-        display_patient_info(qr_info2)
-    
-    print("\n" + "="*80)
-    
-    # Test Case 3: CCCD analysis only
-    print("TEST 3: Phân tích trực tiếp số CCCD")
-    cccd_examples = [
-        "079215000001",  # TP.HCM, Nam, 2015
-        "058186000028",  # Ninh Thuận, Nữ, 1986  
-        "001195000123",  # Hà Nội, Nữ, 1995 (chữ số thứ 4 = 1)
-        "031302000456"   # Hải Phòng, Nữ, 2002 (chữ số thứ 4 = 3)
-    ]
-    
-    for cccd in cccd_examples:
-        province, gender, birth_year = analyze_cccd(cccd)
-        print(f"CCCD {cccd}: {province}, {gender}, {birth_year}")
-    
-    print("\n✅ Hoàn thành test!")
-    print("\nHướng dẫn sử dụng:")
-    print("- QR đầy đủ: CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi")
-    print("- QR tối thiểu: CCCD||HoTen|||")
-    print("- Hệ thống sẽ tự động phân tích CCCD để bổ sung thông tin thiếu")

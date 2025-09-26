@@ -13,10 +13,11 @@ except ImportError:
     PANDAS_AVAILABLE = False
 
 class MenuManager:
-    def __init__(self, controller: Controller, current_user_id: str, user_role: str):
+    def __init__(self, controller: Controller, current_user_id: str, user_role: str, username: str):
         self.controller = controller
         self.current_user_id = current_user_id
         self.user_role = user_role
+        self.username = username
         self.user_repo = UserRepo()
 
     def main_menu(self):
@@ -40,6 +41,7 @@ class MenuManager:
             print("5. �‍⚕️ Quản lý Bác sĩ")
             print("6. �👤 Quản lý Người dùng")
             print("7. 📊 Báo cáo & Xuất Excel")
+            print("8. 🏛️ Migration dữ liệu tỉnh bệnh nhân")
             print("0. 🚪 Đăng xuất")
             print("="*50)
             
@@ -56,6 +58,7 @@ class MenuManager:
                 case 5: self.bac_si_menu()
                 case 6: self.user_management_menu()
                 case 7: self.report_menu()
+                case 8: self.migration_menu()
                 case 0: print("👋 Đăng xuất..."); break
                 case _: print("❌ Chức năng không tồn tại!")
 
@@ -82,7 +85,7 @@ class MenuManager:
                 case 1: self.controller.hien_thi_ds_dich_vu()
                 case 2: self.controller.hien_thi_ds_phong_kham()
                 case 3: self.user_register_appointment()
-                case 4: self.controller.hien_thi_ds_tiep_nhan()
+                case 4: self.controller.hien_thi_lich_su_kham_cua_user(self.username)
                 case 0: print("👋 Đăng xuất..."); break
                 case _: print("❌ Chức năng không tồn tại!")
 
@@ -330,18 +333,79 @@ class MenuManager:
             print(f"❌ Lỗi khi xóa dịch vụ: {e}")
 
     def add_benh_nhan(self):
-        """Add new bệnh nhân"""
+        """Add new bệnh nhân with comprehensive validation"""
         try:
-            so_cccd = input("Số CCCD: ").strip()
-            ho_ten = input("Họ tên: ").strip()
-            gioi_tinh = input("Giới tính (Nam/Nu/Khac): ").strip()
-            ngay_sinh = input("Ngày sinh (dd/mm/yyyy): ").strip()
+            from validation_utils import (
+                input_cccd_with_validation, 
+                input_full_name_with_validation,
+                input_gender_with_recommendation,
+                input_birth_date_with_validation,
+                input_ward_commune_with_validation,
+                input_province_with_recommendation,
+                display_patient_confirmation_info,
+                display_existing_patient_info,
+                confirm_with_default_yes
+            )
             
-            if not all([so_cccd, ho_ten, gioi_tinh, ngay_sinh]):
-                print("❌ Tất cả thông tin không được để trống!")
+            print("\n" + "="*50)
+            print("           THÊM BỆNH NHÂN MỚI")
+            print("="*50)
+            
+            # Step 1: Input and validate CCCD (12 digits required)
+            so_cccd = input_cccd_with_validation()
+            
+            # Step 2: Check if CCCD already exists
+            existing_patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+            if existing_patient:
+                print("\n⚠️  CCCD ĐÃ TỒN TẠI TRONG HỆ THỐNG!")
+                display_existing_patient_info(existing_patient)
+                print("❌ Không thể tạo bệnh nhân trùng CCCD!")
+                print("Vui lòng kiểm tra lại hoặc sử dụng chức năng tìm kiếm bệnh nhân.")
                 return
+            
+            # Step 3: Input other information with validation and recommendations
+            ho_ten = input_full_name_with_validation()
+            gioi_tinh = input_gender_with_recommendation(so_cccd)
+            
+            # Step 4: Input and validate birth date (multiple formats supported)
+            ngay_sinh = input_birth_date_with_validation()
+            
+            # Step 5: Input address information with recommendations
+            print("\n🏠 Thông tin địa chỉ:")
+            phuong_xa = input_ward_commune_with_validation()
+            tinh = input_province_with_recommendation(so_cccd)
+            
+            # Step 6: Display confirmation information (similar to QR creation)
+            display_patient_confirmation_info(ho_ten, gioi_tinh, ngay_sinh, so_cccd)
+            
+            # Step 7: Confirm before saving (default Y)
+            if confirm_with_default_yes("\n📝 Bạn có muốn lưu thông tin bệnh nhân này không?"):
+                # Create patient with address information
+                self.controller.them_benh_nhan_full(ho_ten, gioi_tinh, ngay_sinh, so_cccd, phuong_xa, tinh)
                 
-            self.controller.them_benh_nhan(ho_ten, gioi_tinh, ngay_sinh, so_cccd)
+                print("\n✅ Đã thêm bệnh nhân thành công!")
+                
+                # Display created patient information
+                created_patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+                if created_patient:
+                    print("\n" + "="*60)
+                    print("           THÔNG TIN BỆNH NHÂN VỪA TẠO")
+                    print("="*60)
+                    print(f"🆔 Mã BN: {created_patient.ma_bn}")
+                    print(f"📋 PID: {created_patient.pid}")
+                    print(f"📱 CCCD: {created_patient.so_cccd}")
+                    print(f"👤 Họ tên: {created_patient._ho_ten}")
+                    print(f"⚤ Giới tính: {created_patient._gioi_tinh}")
+                    print(f"🎂 Năm sinh: {created_patient.nam_sinh}")
+                    if phuong_xa:
+                        print(f"🏘️  Phường/Xã: {phuong_xa}")
+                    print(f"🏙️  Tỉnh/TP: {tinh}")
+                    print("="*60)
+            else:
+                print("\n❌ Đã hủy thêm bệnh nhân.")
+                
+        except KeyboardInterrupt:
+            print("\n\n❌ Đã hủy thêm bệnh nhân.")
         except Exception as e:
             print(f"❌ Lỗi khi thêm bệnh nhân: {e}")
 
@@ -362,20 +426,85 @@ class MenuManager:
             print(f"❌ Lỗi khi tìm kiếm: {e}")
 
     def add_tiep_nhan(self):
-        """Add new tiếp nhận"""
+        """Add new tiếp nhận with enhanced step-by-step display"""
         try:
             print("📋 Đăng ký tiếp nhận - Mã tiếp nhận sẽ được tự động tạo")
-            so_cccd = input("CCCD bệnh nhân: ").strip()
-            ma_dv = input("Mã dịch vụ: ").strip()
-            ma_pk = input("Mã phòng khám: ").strip()
-            ly_do = input("Lý do khám: ").strip()
-            ma_bs = input("Mã bác sĩ (để trống nếu chưa chọn): ").strip()
             
-            if not all([so_cccd, ma_dv, ma_pk, ly_do]):
-                print("❌ CCCD, mã dịch vụ, mã phòng khám và lý do khám không được để trống!")
+            # Step 1: Input CCCD and display patient info
+            so_cccd = input("CCCD bệnh nhân: ").strip()
+            if not so_cccd:
+                print("❌ CCCD không được để trống!")
                 return
+            
+            # Get patient info and display
+            patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+            if not patient:
+                print("❌ Không tìm thấy bệnh nhân với CCCD này!")
+                return
+            
+            # Display patient information
+            from validation_utils import display_patient_summary
+            print("\n📋 THÔNG TIN BỆNH NHÂN")
+            print("="*50)
+            display_patient_summary(patient)
+            
+            # Step 2: Display service list and get service selection
+            print("\n💉 DANH SÁCH DỊCH VỤ KỸ THUẬT")
+            print("="*50)
+            self.controller.hien_thi_ds_dich_vu()
+            
+            ma_dv = input("\nMã dịch vụ: ").strip()
+            if not ma_dv:
+                print("❌ Mã dịch vụ không được để trống!")
+                return
+            
+            # Validate service exists
+            dich_vu = self.controller.model.dv_repo.get_by_ma(ma_dv)
+            if not dich_vu:
+                print("❌ Không tìm thấy dịch vụ với mã này!")
+                return
+            
+            # Step 3: Display clinic list and get clinic selection
+            print("\n🏥 DANH SÁCH PHÒNG KHÁM")
+            print("="*50)
+            self.controller.hien_thi_ds_phong_kham()
+            
+            ma_pk = input("\nMã phòng khám: ").strip()
+            if not ma_pk:
+                print("❌ Mã phòng khám không được để trống!")
+                return
+            
+            # Validate clinic exists
+            phong_kham = self.controller.model.pk_repo.get_by_ma(ma_pk)
+            if not phong_kham:
+                print("❌ Không tìm thấy phòng khám với mã này!")
+                return
+            
+            # Step 4: Input reason for examination
+            ly_do = input("\nLý do khám: ").strip()
+            if not ly_do:
+                print("❌ Lý do khám không được để trống!")
+                return
+            
+            ma_bs = input("Mã bác sĩ (để trống để auto-assign): ").strip()
+            
+            # Step 5: Create reception and display comprehensive summary
+            tiep_nhan, cost = self.controller.tiep_nhan_enhanced(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            
+            if tiep_nhan:
+                print("\n✅ THÔNG TIN TỔNG HỢP TIẾP NHẬN")
+                print("="*50)
+                from validation_utils import display_reception_summary
+                display_reception_summary(tiep_nhan, cost)
                 
-            self.controller.tiep_nhan(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+                from validation_utils import confirm_with_default_yes
+                if confirm_with_default_yes("\nXác nhận đăng ký tiếp nhận"):
+                    print(f"✅ Đăng ký tiếp nhận thành công! Mã tiếp nhận: {tiep_nhan.ma_tn}")
+                else:
+                    # Cancel the registration (delete the created record)
+                    self.controller.model.tn_repo.delete_by_ma(tiep_nhan.ma_tn)
+                    print("❌ Đã hủy đăng ký tiếp nhận!")
+            
         except Exception as e:
             print(f"❌ Lỗi khi đăng ký tiếp nhận: {e}")
 
@@ -912,6 +1041,49 @@ class MenuManager:
         except Exception as e:
             print(f"❌ Lỗi khi liệt kê bác sĩ theo phòng khám: {e}")
 
+    def migration_menu(self):
+        """Migration dữ liệu tỉnh bệnh nhân theo NQ 202/2025/QH15"""
+        try:
+            from migration_hanh_chinh import run_full_migration
+            from admin_migration_menu import check_migration_status
+            
+            print("\n" + "="*60)
+            print("🏛️  MIGRATION DỮ LIỆU TỈNH BỆNH NHÂN (NQ 202/2025/QH15)")
+            print("="*60)
+            print("📋 Chức năng này sẽ:")
+            print("   • Tạo các bảng hành chính mới theo NQ 202/2025/QH15")
+            print("   • Mapping dữ liệu từ 63 tỉnh cũ sang 34 đơn vị mới")
+            print("   • Cập nhật thông tin tỉnh của tất cả bệnh nhân")
+            print("   • Bảo toàn dữ liệu gốc trong cột 'Tinh' và thêm cột 'TinhMoi'")
+            print("="*60)
+            
+            # Kiểm tra tình trạng migration hiện tại
+            print("🔍 KIỂM TRA TÌNH TRẠNG HIỆN TẠI:")
+            check_migration_status()
+            
+            print("\n" + "⚠️ " + "="*58)
+            print("  CẢNH BÁO: Thao tác này sẽ thay đổi cấu trúc database!")
+            print("  Nên backup database trước khi thực hiện migration!")
+            print("="*60)
+            
+            confirm = input("Bạn có chắc chắn muốn thực hiện migration? (y/N): ").strip().lower()
+            
+            if confirm == 'y':
+                print("\n🚀 Bắt đầu migration...")
+                success = run_full_migration()
+                if success:
+                    print("\n✅ Migration hoàn thành thành công!")
+                    print("💡 Từ giờ hệ thống sẽ sử dụng cấu trúc hành chính mới")
+                else:
+                    print("\n❌ Migration gặp lỗi!")
+            else:
+                print("❌ Đã hủy thao tác migration.")
+                
+        except ImportError as e:
+            print(f"❌ Không thể import module migration: {e}")
+        except Exception as e:
+            print(f"❌ Lỗi khi thực hiện migration: {e}")
+
 
 def main():
     init_db(seed=True)
@@ -936,7 +1108,7 @@ def main():
     print(f"✅ Xin chào {username}! Quyền: {user._role}")
     
     # Initialize menu manager and start
-    menu_manager = MenuManager(controller, user._user_id, user._role)
+    menu_manager = MenuManager(controller, user._user_id, user._role, username)
     menu_manager.main_menu()
 
 

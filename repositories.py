@@ -183,6 +183,107 @@ class BenhNhanRepo:
         conn.commit()
         conn.close()
         return bn_id
+    
+    def create_enhanced(
+        self,
+        ho_ten: str,
+        gioi_tinh: str,
+        ngay_sinh_ddmmyyyy: str,
+        so_cccd: str,
+        nam_sinh: int = None,
+        tinh: str = None
+    ) -> str:
+        """Create patient with enhanced information from CCCD analysis"""
+        conn = get_conn(); cur = conn.cursor()
+
+        # Generate PID
+        pid = self._generate_pid()
+
+        # Parse address components if province is available
+        phuong_xa = ""
+        if tinh:
+            # You can enhance this logic later to handle full addresses
+            phuong_xa = ""
+
+        # 1) Thêm bệnh nhân with enhanced info (dùng CONVERT kiểu 103 = dd/mm/yyyy)
+        if tinh and nam_sinh:
+            # Insert with both province and birth year
+            cur.execute("""
+                INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, PhuongXa, Tinh, user_created)
+                VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
+            """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, phuong_xa, tinh))
+        elif tinh:
+            # Insert with province only
+            cur.execute("""
+                INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, Tinh, user_created)
+                VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
+            """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, tinh))
+        else:
+            # Fallback to standard insert
+            cur.execute("""
+                INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, user_created)
+                VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
+            """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd))
+
+        # Lấy BN_ID
+        cur.execute("SELECT BN_ID FROM BenhNhan WHERE SoCCCD = ?", (so_cccd,))
+        row = cur.fetchone()
+        bn_id = str(row.BN_ID) if row else ""
+
+        # 2) Auto-register user nếu chưa tồn tại
+        init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
+        cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
+        exists = cur.fetchone() is not None
+        if not exists:
+            cur.execute("""
+                INSERT INTO [user](username, role, pass)
+                VALUES (?, 'USER', ?)
+            """, (so_cccd, init_pass))
+
+        conn.commit()
+        conn.close()
+        return bn_id
+    
+    def create_with_address(
+        self,
+        ho_ten: str,
+        gioi_tinh: str,
+        ngay_sinh_ddmmyyyy: str,
+        so_cccd: str,
+        phuong_xa: str = "",
+        tinh: str = "",
+        nam_sinh: int = None
+    ) -> str:
+        """Create patient with full address information"""
+        conn = get_conn(); cur = conn.cursor()
+
+        # Generate PID
+        pid = self._generate_pid()
+
+        # 1) Thêm bệnh nhân with full address info (dùng CONVERT kiểu 103 = dd/mm/yyyy)
+        cur.execute("""
+            INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, NamSinh, SoCCCD, PhuongXa, Tinh, user_created)
+            VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
+        """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, nam_sinh, so_cccd, phuong_xa, tinh))
+
+        # Lấy BN_ID
+        cur.execute("SELECT BN_ID FROM BenhNhan WHERE SoCCCD = ?", (so_cccd,))
+        row = cur.fetchone()
+        bn_id = str(row.BN_ID) if row else ""
+
+        # 2) Auto-register user nếu chưa tồn tại
+        init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
+        cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
+        exists = cur.fetchone() is not None
+        if not exists:
+            cur.execute("""
+                INSERT INTO [user](username, role, pass)
+                VALUES (?, 'USER', ?)
+            """, (so_cccd, init_pass))
+
+        conn.commit()
+        conn.close()
+        return bn_id
 
     def create_from_qr(
         self,
@@ -308,11 +409,8 @@ class TiepNhanRepo:
             VALUES (?, ?, ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
         """, (ma_tn, bn_id, ly_do, dv_id, pk_id, bs_id_param))
         conn.commit()
-        # Get the newly created ID
-        cur.execute("SELECT TiepNhan_ID FROM TiepNhan WHERE MaTiepNhan = ?", (ma_tn,))
-        row = cur.fetchone()
         conn.close()
-        return str(row.TiepNhan_ID) if row else ""
+        return ma_tn  # Return the ma_tn code instead of TiepNhan_ID
 
     def list_all(self) -> List[TiepNhan]:
         conn = get_conn(); cur = conn.cursor()
@@ -341,6 +439,65 @@ class TiepNhanRepo:
             bs = BacSi(str(r.BS_ID), r.MaBacSi, r.BSHoTen, r.ChuyenKhoa or "", "", "") if r.BS_ID else None
             result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs))
         return result
+
+    def list_by_user(self, username: str) -> List[TiepNhan]:
+        """Lấy lịch sử tiếp nhận của một user cụ thể dựa trên username == CCCD bệnh nhân"""
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute("""
+            SELECT tn.TiepNhan_ID, tn.MaTiepNhan, tn.LyDoKham,
+                   bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
+                   dv.dv_id, dv.MaDichVu, dv.TenDichVu, dv.GiaDichVu,
+                   pk.PK_ID, pk.MaPhong, pk.TenPhong,
+                   bs.BS_ID, bs.MaBacSi, bs.HoTen as BSHoTen, bs.ChuyenKhoa,
+                   tn.created_at
+            FROM TiepNhan tn
+            JOIN BenhNhan bn ON bn.BN_ID = tn.BN_ID
+            LEFT JOIN DM_DichVuKyThuat dv ON dv.dv_id = tn.Dv_ID
+            LEFT JOIN PhongKham pk ON pk.PK_ID = tn.PK_ID
+            LEFT JOIN BacSi bs ON bs.BS_ID = tn.BS_ID
+            WHERE bn.SoCCCD = ?
+            ORDER BY tn.created_at DESC
+        """, (username,))
+        rows = cur.fetchall(); conn.close()
+
+        result: List[TiepNhan] = []
+        for r in rows:
+            ma_bn = f"BN{str(r.BN_ID)[:8]}"  # Use first 8 chars of UUID for ma_bn
+            pid = r.PID if r.PID else "00000000"  # Default PID if null
+            bn = BenhNhan(str(r.BN_ID), ma_bn, pid, r.HoTen, r.GioiTinh, r.NamSinh, r.SoCCCD)
+            dv = DichVu(str(r.dv_id), r.MaDichVu, r.TenDichVu, r.GiaDichVu) if r.dv_id else None
+            pk = PhongKham(str(r.PK_ID), r.MaPhong, r.TenPhong) if r.PK_ID else None
+            bs = BacSi(str(r.BS_ID), r.MaBacSi, r.BSHoTen, r.ChuyenKhoa or "", "", "") if r.BS_ID else None
+            result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs))
+        return result
+
+    def get_by_ma(self, ma_tn: str) -> Optional[TiepNhan]:
+        """Lấy thông tin tiếp nhận theo mã tiếp nhận"""
+        conn = get_conn(); cur = conn.cursor()
+        cur.execute("""
+            SELECT tn.TiepNhan_ID, tn.MaTiepNhan, tn.LyDoKham,
+                   bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
+                   dv.dv_id, dv.MaDichVu, dv.TenDichVu, dv.GiaDichVu,
+                   pk.PK_ID, pk.MaPhong, pk.TenPhong,
+                   bs.BS_ID, bs.MaBacSi, bs.HoTen as BSHoTen, bs.ChuyenKhoa
+            FROM TiepNhan tn
+            JOIN BenhNhan bn ON bn.BN_ID = tn.BN_ID
+            LEFT JOIN DM_DichVuKyThuat dv ON dv.dv_id = tn.Dv_ID
+            LEFT JOIN PhongKham pk ON pk.PK_ID = tn.PK_ID
+            LEFT JOIN BacSi bs ON bs.BS_ID = tn.BS_ID
+            WHERE tn.MaTiepNhan = ?
+        """, (ma_tn,))
+        row = cur.fetchone(); conn.close()
+        
+        if not row: return None
+        
+        ma_bn = f"BN{str(row.BN_ID)[:8]}"  # Use first 8 chars of UUID for ma_bn
+        pid = row.PID if row.PID else "00000000"  # Default PID if null
+        bn = BenhNhan(str(row.BN_ID), ma_bn, pid, row.HoTen, row.GioiTinh, row.NamSinh, row.SoCCCD)
+        dv = DichVu(str(row.dv_id), row.MaDichVu, row.TenDichVu, row.GiaDichVu) if row.dv_id else None
+        pk = PhongKham(str(row.PK_ID), row.MaPhong, row.TenPhong) if row.PK_ID else None
+        bs = BacSi(str(row.BS_ID), row.MaBacSi, row.BSHoTen, row.ChuyenKhoa or "", "", "") if row.BS_ID else None
+        return TiepNhan(str(row.TiepNhan_ID), row.MaTiepNhan, bn, row.LyDoKham, dv, pk, bs)
 
     def delete_by_ma(self, ma_tn: str) -> int:
         conn = get_conn(); cur = conn.cursor()

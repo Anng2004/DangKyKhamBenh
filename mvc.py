@@ -35,6 +35,9 @@ class Model:
     def list_tiep_nhan(self) -> List[TiepNhan]:
         return self.tn_repo.list_all()
 
+    def list_tiep_nhan_by_user(self, username: str) -> List[TiepNhan]:
+        return self.tn_repo.list_by_user(username)
+
     def list_bac_si(self) -> List[BacSi]:
         return self.bs_repo.list_all()
 
@@ -52,8 +55,81 @@ class Controller:
         ngay_sinh_ddmmyyyy: str,   # <-- THÊM
         so_cccd: str
     ) -> None:
-        bn_id = self.model.bn_repo.create(
-            ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd
+        from qr_utils import analyze_cccd, get_new_province_from_old
+        
+        # Auto-extract information from CCCD
+        province_old, gender_cccd, birth_year_cccd, province_new = analyze_cccd(so_cccd)
+        
+        # Extract year from ngay_sinh_ddmmyyyy if not available from CCCD
+        try:
+            input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
+        except:
+            input_year = None
+        
+        # Use CCCD birth year if available and different from input
+        final_birth_year = birth_year_cccd if birth_year_cccd else input_year
+        
+        # Use new province mapping if available
+        final_province = province_new if province_new else province_old
+        
+        # Display automatic extraction info
+        if birth_year_cccd and birth_year_cccd != input_year:
+            self.view.print_message(f"ℹ️  Tự động cập nhật năm sinh từ CCCD: {birth_year_cccd} (thay vì {input_year})")
+        
+        if final_province:
+            self.view.print_message(f"ℹ️  Tự động xác định tỉnh từ CCCD: {final_province}")
+        
+        if gender_cccd and gender_cccd != gioi_tinh:
+            self.view.print_message(f"⚠️  Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gender_cccd})")
+        
+        # Create patient with enhanced information
+        bn_id = self.model.bn_repo.create_enhanced(
+            ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
+            final_birth_year, final_province
+        )
+        self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
+        
+    def them_benh_nhan_full(
+        self,
+        ho_ten: str,
+        gioi_tinh: str,
+        ngay_sinh_ddmmyyyy: str,
+        so_cccd: str,
+        phuong_xa: str = "",
+        tinh: str = ""
+    ) -> None:
+        """Create patient with full address information"""
+        from qr_utils import analyze_cccd, get_new_province_from_old
+        
+        # Auto-extract information from CCCD
+        province_old, gender_cccd, birth_year_cccd, province_new = analyze_cccd(so_cccd)
+        
+        # Extract year from ngay_sinh_ddmmyyyy
+        try:
+            input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
+        except:
+            input_year = None
+        
+        # Use CCCD birth year if available, otherwise use input year
+        final_birth_year = birth_year_cccd if birth_year_cccd else input_year
+        
+        # Use input province or auto-detected province
+        final_province = tinh if tinh else (province_new if province_new else province_old)
+        
+        # Display automatic extraction info
+        if birth_year_cccd and birth_year_cccd != input_year:
+            self.view.print_message(f"ℹ️  Tự động cập nhật năm sinh từ CCCD: {birth_year_cccd} (thay vì {input_year})")
+        
+        if not tinh and final_province:
+            self.view.print_message(f"ℹ️  Tự động xác định tỉnh từ CCCD: {final_province}")
+        
+        if gender_cccd and gender_cccd != gioi_tinh:
+            self.view.print_message(f"⚠️  Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gender_cccd})")
+        
+        # Create patient with full address information and birth year
+        bn_id = self.model.bn_repo.create_with_address(
+            ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
+            phuong_xa, final_province, final_birth_year
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
 
@@ -83,6 +159,37 @@ class Controller:
         bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
         self.view.print_message(f"Đăng ký thành công (id={tn_id}). Chi phí tạm tính: {chi_phi:,}đ{bs_info}")
 
+    def tiep_nhan_enhanced(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> tuple:
+        """Enhanced tiep nhan that returns TiepNhan object and cost for display"""
+        bn = self.model.bn_repo.get_by_cccd(so_cccd)
+        if not bn:
+            self.view.print_message("Không tìm thấy bệnh nhân với CCCD đã nhập.")
+            return None, None
+        
+        dv = self.model.dv_repo.get_by_ma(ma_dv)
+        pk = self.model.pk_repo.get_by_ma(ma_pk)
+        if not dv or not pk:
+            self.view.print_message("Không tìm thấy dịch vụ hoặc phòng khám.")
+            return None, None
+        
+        bs = None
+        bs_id = ""
+        if ma_bs:
+            bs = self.model.bs_repo.get_by_ma(ma_bs)
+            if not bs:
+                self.view.print_message("Không tìm thấy bác sĩ với mã đã nhập.")
+                return None, None
+            bs_id = bs.bs_id
+        
+        # Create tiep nhan - now returns ma_tn
+        ma_tn = self.model.tn_repo.create(bn.bn_id, ly_do, dv.dv_id, pk.pk_id, bs_id)
+        chi_phi = ChiPhiKham.tinh_chi_phi(dv, pk)
+        
+        # Get the created TiepNhan object using ma_tn
+        tiep_nhan = self.model.tn_repo.get_by_ma(ma_tn)
+        
+        return tiep_nhan, chi_phi
+
     # 3. Xem danh sách
     def hien_thi_ds_benh_nhan(self):
         self.view.print_list(self.model.list_benh_nhan())
@@ -95,6 +202,17 @@ class Controller:
 
     def hien_thi_ds_tiep_nhan(self):
         self.view.print_list(self.model.list_tiep_nhan())
+    
+    def hien_thi_lich_su_kham_cua_user(self, username: str):
+        """Hiển thị lịch sử khám của user cụ thể dựa trên username == CCCD"""
+        lich_su = self.model.list_tiep_nhan_by_user(username)
+        if not lich_su:
+            self.view.print_message(f"📋 Không tìm thấy lịch sử khám cho tài khoản: {username}")
+            return
+        
+        self.view.print_message(f"📋 LỊCH SỬ KHÁM CỦA TÀI KHOẢN: {username}")
+        self.view.print_message("="*60)
+        self.view.print_list(lich_su)
 
     def hien_thi_ds_bac_si(self):
         self.view.print_list(self.model.list_bac_si())
