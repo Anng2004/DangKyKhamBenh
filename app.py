@@ -21,7 +21,6 @@ class MenuManager:
         self.user_repo = UserRepo()
 
     def main_menu(self):
-        """Main menu dispatcher based on user role"""
         if self.user_role.upper() == "ADMIN":
             self.admin_main_menu()
         else:
@@ -34,12 +33,12 @@ class MenuManager:
             print("           HỆ THỐNG QUẢN LÝ KHÁM BỆNH")
             print("              MENU QUẢN TRỊ VIÊN")
             print("="*50)
-            print("1. 🏥 Quản lý Phòng khám")
-            print("2. 🩺 Quản lý Dịch vụ")
-            print("3. 👥 Quản lý Bệnh nhân")
-            print("4. 📋 Quản lý Tiếp nhận")
-            print("5. �‍⚕️ Quản lý Bác sĩ")
-            print("6. �👤 Quản lý Người dùng")
+            print("1. 📋 Quản lý Tiếp nhận")
+            print("2. 🏥 Quản lý Phòng khám")
+            print("3. 🩺 Quản lý Dịch vụ")
+            print("4. 👳 Quản lý Bệnh nhân")
+            print("5. 👨‍⚕️ Quản lý Bác sĩ")
+            print("6. 👤 Quản lý Người dùng")
             print("7. 📊 Báo cáo & Xuất Excel")
             print("8. 🏛️ Migration dữ liệu tỉnh bệnh nhân")
             print("0. 🚪 Đăng xuất")
@@ -51,10 +50,10 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.phong_kham_menu()
-                case 2: self.dich_vu_menu()
-                case 3: self.benh_nhan_menu()
-                case 4: self.tiep_nhan_menu()
+                case 1: self.tiep_nhan_menu()
+                case 2: self.phong_kham_menu()
+                case 3: self.dich_vu_menu()
+                case 4: self.benh_nhan_menu()
                 case 5: self.bac_si_menu()
                 case 6: self.user_management_menu()
                 case 7: self.report_menu()
@@ -82,8 +81,8 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_dich_vu()
-                case 2: self.controller.hien_thi_ds_phong_kham()
+                case 1: self.controller.hien_thi_danh_sach_dich_vu_cho_user()
+                case 2: self.controller.hien_thi_danh_sach_phong_kham_cho_user()
                 case 3: self.user_register_appointment()
                 case 4: self.controller.hien_thi_lich_su_kham_cua_user(self.username)
                 case 0: print("👋 Đăng xuất..."); break
@@ -107,7 +106,7 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_phong_kham()
+                case 1: self.controller.hien_thi_danh_sach_phong_kham_cho_user()
                 case 2: self.add_phong_kham()
                 case 3: self.delete_phong_kham()
                 case 0: break
@@ -131,7 +130,7 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_dich_vu()
+                case 1: self.controller.hien_thi_danh_sach_dich_vu_cho_user()
                 case 2: self.add_dich_vu()
                 case 3: self.delete_dich_vu()
                 case 0: break
@@ -155,7 +154,7 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_benh_nhan()
+                case 1: self.controller.hien_thi_danh_sach_benh_nhan_cho_admin()
                 case 2: self.add_benh_nhan()
                 case 3: self.search_benh_nhan()
                 case 0: break
@@ -167,9 +166,9 @@ class MenuManager:
             print("\n" + "="*40)
             print("         QUẢN LÝ TIẾP NHẬN")
             print("="*40)
-            print("1. 📋 Danh sách tiếp nhận")
+            print("1. 📱 Quét QR code đăng ký")
             print("2. ➕ Đăng ký tiếp nhận mới")
-            print("3. 📱 Quét QR code đăng ký")
+            print("3. 📋 Danh sách tiếp nhận")
             print("4. ❌ Hủy tiếp nhận")
             print("0. ⬅️  Quay lại menu chính")
             print("="*40)
@@ -180,9 +179,9 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_tiep_nhan()
+                case 1: self.qr_scan_tiep_nhan()
                 case 2: self.add_tiep_nhan()
-                case 3: self.qr_scan_tiep_nhan()
+                case 3: self.controller.hien_thi_danh_sach_tiep_nhan_cho_admin()
                 case 4: self.cancel_tiep_nhan()
                 case 0: break
                 case _: print("❌ Chức năng không tồn tại!")
@@ -207,7 +206,7 @@ class MenuManager:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.controller.hien_thi_ds_bac_si()
+                case 1: self.controller.hien_thi_danh_sach_bac_si_cho_user()
                 case 2: self.add_bac_si()
                 case 3: self.assign_bac_si_to_phong_kham()
                 case 4: self.list_bac_si_by_phong_kham()
@@ -244,21 +243,35 @@ class MenuManager:
                 case _: print("❌ Chức năng không tồn tại!")
 
     def report_menu(self):
-        """Report and Excel export submenu"""
+        """Enhanced Report and Excel export submenu"""
         while True:
-            print("\n" + "="*40)
-            print("       BÁO CÁO & XUẤT EXCEL")
-            print("="*40)
-            print("1. 📊 Xuất danh sách bệnh nhân")
-            print("2. 📊 Xuất danh sách tiếp nhận")
-            print("3. 📊 Xuất báo cáo dịch vụ")
-            print("4. 📊 Xuất báo cáo phòng khám")
-            print("5. 📊 Báo cáo tổng hợp")
-            print("0. ⬅️  Quay lại menu chính")
-            print("="*40)
+            print("\n" + "="*60)
+            print("           📊 BÁO CÁO & XUẤT EXCEL - NÂNG CAP")
+            print("="*60)
+            print("📋 XUẤT DANH SÁCH CƠ BẢN:")
+            print("  1. � Xuất danh sách bệnh nhân")
+            print("  2. 🏥 Xuất danh sách tiếp nhận")  
+            print("  3. 🩺 Xuất báo cáo dịch vụ")
+            print("  4. 🏨 Xuất báo cáo phòng khám")
+            print("  5. ⚕️  Xuất báo cáo bác sĩ")
+            print()
+            print("📊 BÁO CÁO THỐNG KÊ & PHÂN TÍCH:")
+            print("  6. 📈 Báo cáo thống kê tổng hợp")
+            print("  7. 💰 Báo cáo doanh thu & phân tích")
+            print("  8. 📅 Báo cáo hoạt động hôm nay")
+            print("  9. 📋 Báo cáo tổng hợp đa trang")
+            print()
+            print("📁 QUẢN LÝ FILE:")
+            print(" 10. 📂 Mở thư mục báo cáo")
+            print(" 11. 🧹 Dọn dẹp file cũ")
+            print()
+            print("  0. ⬅️  Quay lại menu chính")
+            print("="*60)
+            print("💡 Tất cả file báo cáo được lưu trong thư mục 'reports'")
+            print("📊 Hỗ trợ Excel (nếu có pandas) hoặc CSV")
             
             try:
-                choice = int(input("Chọn chức năng: ").strip())
+                choice = int(input("\n➤ Chọn chức năng: ").strip())
             except ValueError:
                 print("❌ Vui lòng nhập số hợp lệ!"); continue
 
@@ -267,9 +280,97 @@ class MenuManager:
                 case 2: self.export_tiep_nhan()
                 case 3: self.export_dich_vu_report()
                 case 4: self.export_phong_kham_report()
-                case 5: self.export_summary_report()
+                case 5: self.export_bac_si_report()
+                case 6: self.export_statistical_report()
+                case 7: self.export_revenue_report()
+                case 8: self.export_daily_report()
+                case 9: self.export_summary_report()
+                case 10: self.open_reports_folder()
+                case 11: self.cleanup_old_reports()
                 case 0: break
                 case _: print("❌ Chức năng không tồn tại!")
+
+    def open_reports_folder(self):
+        """Open reports folder in file manager"""
+        try:
+            import subprocess
+            import platform
+            reports_path = os.path.abspath("reports")
+            
+            if not os.path.exists(reports_path):
+                print(f"❌ Thư mục báo cáo không tồn tại: {reports_path}")
+                return
+            
+            system = platform.system()
+            if system == "Darwin":  # macOS
+                subprocess.run(["open", reports_path])
+            elif system == "Windows":
+                subprocess.run(["explorer", reports_path])
+            elif system == "Linux":
+                subprocess.run(["xdg-open", reports_path])
+            else:
+                print(f"📁 Đường dẫn thư mục báo cáo: {reports_path}")
+                return
+                
+            print(f"✅ Đã mở thư mục báo cáo: {reports_path}")
+            
+        except Exception as e:
+            print(f"❌ Không thể mở thư mục: {e}")
+            print(f"📁 Đường dẫn thủ công: {os.path.abspath('reports')}")
+
+    def cleanup_old_reports(self):
+        """Clean up old report files"""
+        try:
+            import glob
+            from datetime import datetime, timedelta
+            
+            # Ask for retention days
+            try:
+                days = int(input("Xóa báo cáo cũ hơn bao nhiêu ngày? (mặc định 30): ").strip() or "30")
+            except ValueError:
+                days = 30
+            
+            cutoff_date = datetime.now() - timedelta(days=days)
+            reports_path = "reports"
+            
+            if not os.path.exists(reports_path):
+                print("❌ Thư mục báo cáo không tồn tại!")
+                return
+            
+            # Find old files
+            old_files = []
+            for root, dirs, files in os.walk(reports_path):
+                for file in files:
+                    if file.endswith(('.xlsx', '.csv')):
+                        file_path = os.path.join(root, file)
+                        file_time = datetime.fromtimestamp(os.path.getctime(file_path))
+                        if file_time < cutoff_date:
+                            old_files.append((file_path, file_time))
+            
+            if not old_files:
+                print(f"✅ Không có báo cáo nào cũ hơn {days} ngày!")
+                return
+            
+            print(f"\n📋 Tìm thấy {len(old_files)} file báo cáo cũ:")
+            for file_path, file_time in old_files:
+                print(f"  • {os.path.basename(file_path)} ({file_time.strftime('%d/%m/%Y')})")
+            
+            confirm = input(f"\n⚠️  Xác nhận xóa {len(old_files)} file? (y/n): ").strip().lower()
+            if confirm == 'y':
+                deleted = 0
+                for file_path, _ in old_files:
+                    try:
+                        os.remove(file_path)
+                        deleted += 1
+                    except Exception as e:
+                        print(f"❌ Không thể xóa {os.path.basename(file_path)}: {e}")
+                
+                print(f"✅ Đã xóa {deleted}/{len(old_files)} file báo cáo cũ!")
+            else:
+                print("❌ Đã hủy thao tác dọn dẹp.")
+                
+        except Exception as e:
+            print(f"❌ Lỗi khi dọn dẹp báo cáo: {e}")
 
     # =============== IMPLEMENTATION METHODS ===============
 
@@ -451,7 +552,7 @@ class MenuManager:
             # Step 2: Display service list and get service selection
             print("\n💉 DANH SÁCH DỊCH VỤ KỸ THUẬT")
             print("="*50)
-            self.controller.hien_thi_ds_dich_vu()
+            self.controller.hien_thi_danh_sach_dich_vu_cho_user()
             
             ma_dv = input("\nMã dịch vụ: ").strip()
             if not ma_dv:
@@ -467,7 +568,7 @@ class MenuManager:
             # Step 3: Display clinic list and get clinic selection
             print("\n🏥 DANH SÁCH PHÒNG KHÁM")
             print("="*50)
-            self.controller.hien_thi_ds_phong_kham()
+            self.controller.hien_thi_danh_sach_phong_kham_cho_user()
             
             ma_pk = input("\nMã phòng khám: ").strip()
             if not ma_pk:
@@ -525,8 +626,8 @@ class MenuManager:
             print("\n📱 QUÉT QR CODE ĐĂNG KÝ TIẾP NHẬN")
             print("=" * 50)
             print("Vui lòng nhập chuỗi QR code từ CCCD/CMND")
-            print("Định dạng: CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi")
-            print("Ví dụ: 058090007045|264362146|Nguyễn Gio An|20041990|Nam|Thôn La Vang 1...")
+            print("Định dạng: CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi|NgayCap")
+            print("Ví dụ: 058090000000|26430000|Nguyễn Văn An|01011990|Nam|Thôn La Vang 1, Ninh Thuận|01012020")
             
             qr_string = input("📱 QR Code: ").strip()
             if not qr_string:
@@ -546,7 +647,7 @@ class MenuManager:
             
             # Show services
             print("Danh sách dịch vụ:")
-            self.controller.hien_thi_ds_dich_vu()
+            self.controller.hien_thi_danh_sach_dich_vu_cho_user()
             
             ma_dv = input("\nMã dịch vụ: ").strip()
             if not ma_dv:
@@ -555,7 +656,7 @@ class MenuManager:
             
             # Show clinics
             print("\nDanh sách phòng khám:")
-            self.controller.hien_thi_ds_phong_kham()
+            self.controller.hien_thi_danh_sach_phong_kham_cho_user()
             
             ma_pk = input("\nMã phòng khám: ").strip()
             if not ma_pk:
@@ -576,27 +677,104 @@ class MenuManager:
             print(f"❌ Lỗi khi xử lý QR scan: {e}")
 
     def user_register_appointment(self):
-        """User registration for appointment"""
+        """User registration for appointment - Enhanced version with sequential display"""
         try:
-            print("📋 Đăng ký khám - Mã tiếp nhận sẽ được tự động tạo")
-            so_cccd = input("CCCD của bạn: ").strip()
-            ma_dv = input("Mã dịch vụ: ").strip()
-            ma_pk = input("Mã phòng khám: ").strip()
-            ly_do = input("Lý do khám: ").strip()
-            ma_bs = input("Mã bác sĩ (để trống nếu chưa chọn): ").strip()
+            print("\n🏥 ĐĂNG KÝ KHÁM BỆNH")
+            print("="*50)
+            print("📋 Hệ thống sẽ tự động lấy thông tin của bạn từ tài khoản")
+            print(f"👤 Tài khoản: {self.username}")
+            print("="*50)
             
-            if not all([so_cccd, ma_dv, ma_pk, ly_do]):
-                print("❌ CCCD, mã dịch vụ, mã phòng khám và lý do khám không được để trống!")
+            # Step 1: Display services list and get service selection
+            print("\n🩺 BƯỚC 1: CHỌN DỊCH VỤ KHÁM")
+            print("-"*40)
+            self.controller.hien_thi_danh_sach_dich_vu_cho_user()
+            
+            ma_dv = ""
+            while not ma_dv.strip():
+                ma_dv = input("\n➤ Nhập mã dịch vụ: ").strip()
+                if not ma_dv:
+                    print("❌ Mã dịch vụ không được để trống! Vui lòng chọn từ danh sách trên.")
+            
+            # Validate service exists
+            dich_vu = self.controller.model.dv_repo.get_by_ma(ma_dv)
+            if not dich_vu:
+                print(f"❌ Không tìm thấy dịch vụ với mã '{ma_dv}'!")
                 return
-                
-            self.controller.tiep_nhan(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            
+            print(f"✅ Đã chọn dịch vụ: {dich_vu._ma_dv} - {dich_vu._ten_dv} ({dich_vu._gia:,}đ)")
+            
+            # Step 2: Display clinics list and get clinic selection
+            print("\n🏥 BƯỚC 2: CHỌN PHÒNG KHÁM")
+            print("-"*40)
+            self.controller.hien_thi_danh_sach_phong_kham_cho_user()
+            
+            ma_pk = ""
+            while not ma_pk.strip():
+                ma_pk = input("\n➤ Nhập mã phòng khám: ").strip()
+                if not ma_pk:
+                    print("❌ Mã phòng khám không được để trống! Vui lòng chọn từ danh sách trên.")
+            
+            # Validate clinic exists
+            phong_kham = self.controller.model.pk_repo.get_by_ma(ma_pk)
+            if not phong_kham:
+                print(f"❌ Không tìm thấy phòng khám với mã '{ma_pk}'!")
+                return
+            
+            print(f"✅ Đã chọn phòng khám: {phong_kham._ma_phong} - {phong_kham._ten_phong}")
+            
+            # Step 3: Input reason (mandatory)
+            print("\n📝 BƯỚC 3: LÝ DO KHÁM BỆNH")
+            print("-"*40)
+            ly_do = ""
+            while not ly_do.strip():
+                ly_do = input("➤ Nhập lý do khám: ").strip()
+                if not ly_do:
+                    print("❌ Lý do khám không được để trống!")
+            
+            print(f"✅ Lý do khám: {ly_do}")
+            
+            # Step 4: Optional doctor selection
+            print("\n👨‍⚕️ BƯỚC 4: CHỌN BÁC SĨ (TÙY CHỌN)")
+            print("-"*40)
+            print("💡 Để trống để hệ thống tự động gán bác sĩ theo phòng khám")
+            self.controller.hien_thi_danh_sach_bac_si_cho_user()
+            
+            ma_bs = input("\n➤ Nhập mã bác sĩ (để trống để tự động chọn): ").strip()
+            
+            if ma_bs:
+                # Validate doctor exists if provided
+                bac_si = self.controller.model.bs_repo.get_by_ma(ma_bs)
+                if not bac_si:
+                    print(f"❌ Không tìm thấy bác sĩ với mã '{ma_bs}'! Sẽ tự động gán bác sĩ.")
+                    ma_bs = ""
+                else:
+                    print(f"✅ Đã chọn bác sĩ: {bac_si.ma_bs} - {bac_si.ho_ten} ({bac_si.chuyen_khoa})")
+            else:
+                print("✅ Sẽ tự động gán bác sĩ theo phòng khám")
+            
+            # Step 5: Confirm and register
+            print("\n🔄 BƯỚC 5: XÁC NHẬN ĐĂNG KÝ")
+            print("-"*40)
+            print(f"📋 Dịch vụ: {dich_vu._ten_dv} ({dich_vu._gia:,}đ)")
+            print(f"🏥 Phòng khám: {phong_kham._ten_phong}")
+            print(f"📝 Lý do: {ly_do}")
+            print(f"👨‍⚕️ Bác sĩ: {bac_si.ho_ten if ma_bs and 'bac_si' in locals() else 'Tự động gán'}")
+            
+            confirm = input("\n✅ Xác nhận đăng ký? (y/n): ").strip().lower()
+            if confirm == 'y':
+                # Use username as CCCD for registration
+                self.controller.tiep_nhan_cho_user(self.username, ma_dv, ma_pk, ly_do, ma_bs)
+            else:
+                print("❌ Đã hủy đăng ký khám bệnh.")
+            
         except Exception as e:
             print(f"❌ Lỗi khi đăng ký khám: {e}")
 
     # =============== USER MANAGEMENT METHODS ===============
 
     def list_users(self):
-        """List all users"""
+        """List all users with enhanced formatting"""
         try:
             from db import get_conn
             conn = get_conn()
@@ -606,15 +784,18 @@ class MenuManager:
             conn.close()
             
             if users:
-                print("\n📋 DANH SÁCH NGƯỜI DÙNG:")
-                print("-" * 80)
-                print(f"{'STT':<5} {'Username':<20} {'Role':<10} {'Mật khẩu':<10} {'Ngày tạo':<20}")
-                print("-" * 80)
+                print("\n� DANH SÁCH NGƯỜI DÙNG")
+                print("="*80)
+                print(f"{'STT':<4} {'Username':<20} {'Role':<8} {'Mật khẩu':<12} {'Ngày tạo':<20}")
+                print("-"*80)
                 for i, user in enumerate(users, 1):
                     created_date = user.created_at.strftime("%d/%m/%Y %H:%M") if user.created_at else "N/A"
-                    print(users)
-                    print(f"{i:<5} {user.username:<20} {user.role:<10} {user:<10} {created_date:<20}")
-                print("-" * 80)
+                    password = getattr(user, 'pass', 'N/A')
+                    # Mask password for security
+                    masked_password = '*' * len(password) if password != 'N/A' else 'N/A'
+                    print(f"{i:<4} {user.username:<20} {user.role:<8} {masked_password:<12} {created_date:<20}")
+                print("="*80)
+                print(f"📊 Tổng cộng: {len(users)} người dùng")
             else:
                 print("❌ Không có người dùng nào trong hệ thống")
         except Exception as e:
@@ -709,7 +890,7 @@ class MenuManager:
                 print("❌ Tên đăng nhập không được để trống!")
                 return
                 
-            confirm = input(f"Bạn có chắc muốn xóa tài khoản '{username}'? (y/N): ").strip().lower()
+            confirm = input(f"Bạn có chắc muốn xóa tài khoản '{username}'? (y/n): ").strip().lower()
             if confirm != 'y':
                 print("❌ Đã hủy thao tác xóa")
                 return
@@ -727,173 +908,169 @@ class MenuManager:
         except Exception as e:
             print(f"❌ Lỗi khi xóa tài khoản: {e}")
 
-    # =============== EXCEL EXPORT METHODS ===============
+    # =============== ENHANCED EXCEL EXPORT METHODS ===============
+    
+    def __init_report_manager(self):
+        """Initialize report manager"""
+        if not hasattr(self, 'report_manager'):
+            from report_utils import ReportManager
+            self.report_manager = ReportManager()
+        return self.report_manager
 
     def export_benh_nhan(self):
-        """Export bệnh nhân list to Excel"""
+        """Export bệnh nhân list to Excel with enhanced features"""
         try:
             benh_nhan_list = self.controller.model.list_benh_nhan()
             if not benh_nhan_list:
                 print("❌ Không có dữ liệu bệnh nhân để xuất!")
                 return
             
-            # Prepare data for Excel
-            data = []
-            for bn in benh_nhan_list:
-                data.append({
-                    'STT': len(data) + 1,
-                    'Mã BN': bn.ma_bn,
-                    'PID': bn.pid,
-                    'Họ tên': bn._ho_ten,
-                    'Giới tính': bn._gioi_tinh,
-                    'Năm sinh': bn._nam_sinh,
-                    'CCCD': bn._so_cccd
-                })
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
             
-            # Create Excel file
-            filename = f"DanhSach_BenhNhan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-            filepath = os.path.join(os.getcwd(), filename)
+            # Format data using utility functions
+            from report_utils import format_benh_nhan_data
+            data = format_benh_nhan_data(benh_nhan_list)
             
-            try:
-                import pandas as pd
-                df = pd.DataFrame(data)
-                df.to_excel(filepath, index=False, sheet_name='Danh sách bệnh nhân')
-                print(f"✅ Đã xuất file Excel: {filename}")
-            except ImportError:
-                # Fallback to CSV if pandas not available
-                import csv
-                csv_filename = filename.replace('.xlsx', '.csv')
-                csv_filepath = os.path.join(os.getcwd(), csv_filename)
-                with open(csv_filepath, 'w', newline='', encoding='utf-8') as csvfile:
-                    if data:
-                        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
-                        writer.writeheader()
-                        writer.writerows(data)
-                print(f"✅ Đã xuất file CSV: {csv_filename} (pandas không khả dụng)")
+            # Generate filename and path
+            filename = report_mgr.generate_filename("DanhSach_BenhNhan", "xlsx")
+            filepath = report_mgr.get_report_path("benh_nhan", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                "Danh sách bệnh nhân",
+                "📋 DANH SÁCH BỆNH NHÂN",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất danh sách bệnh nhân: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Tổng số bản ghi: {len(data)}")
+            else:
+                print("❌ Không thể xuất file!")
                 
         except Exception as e:
-            print(f"❌ Lỗi khi xuất file: {e}")
+            print(f"❌ Lỗi khi xuất danh sách bệnh nhân: {e}")
 
     def export_tiep_nhan(self):
-        """Export tiếp nhận list to Excel"""
+        """Export tiếp nhận list to Excel with enhanced features"""
         try:
             tiep_nhan_list = self.controller.model.list_tiep_nhan()
             if not tiep_nhan_list:
                 print("❌ Không có dữ liệu tiếp nhận để xuất!")
                 return
             
-            # Prepare data for Excel
-            data = []
-            for tn in tiep_nhan_list:
-                data.append({
-                    'STT': len(data) + 1,
-                    'Mã tiếp nhận': tn._ma_tn,
-                    'Mã BN': tn._bn.ma_bn,
-                    'PID': tn._bn.pid,
-                    'Tên bệnh nhân': tn._bn._ho_ten,
-                    'CCCD': tn._bn._so_cccd,
-                    'Dịch vụ': tn._dv._ten_dv if tn._dv else "N/A",
-                    'Phòng khám': tn._pk._ten_phong if tn._pk else "N/A",
-                    'Lý do khám': tn._ly_do
-                })
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
             
-            # Create Excel file
-            filename = f"DanhSach_TiepNhan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            # Format data using utility functions
+            from report_utils import format_tiep_nhan_data
+            data = format_tiep_nhan_data(tiep_nhan_list)
             
-            try:
-                import pandas as pd
-                df = pd.DataFrame(data)
-                df.to_excel(filename, index=False, sheet_name='Danh sách tiếp nhận')
-                print(f"✅ Đã xuất file Excel: {filename}")
-            except ImportError:
-                # Fallback to CSV
-                import csv
-                csv_filename = filename.replace('.xlsx', '.csv')
-                with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-                    if data:
-                        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
-                        writer.writeheader()
-                        writer.writerows(data)
-                print(f"✅ Đã xuất file CSV: {csv_filename}")
+            # Generate filename and path
+            filename = report_mgr.generate_filename("DanhSach_TiepNhan", "xlsx")
+            filepath = report_mgr.get_report_path("tiep_nhan", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                "Danh sách tiếp nhận",
+                "🏥 DANH SÁCH TIẾP NHẬN",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất danh sách tiếp nhận: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Tổng số bản ghi: {len(data)}")
+            else:
+                print("❌ Không thể xuất file!")
                 
         except Exception as e:
-            print(f"❌ Lỗi khi xuất file: {e}")
+            print(f"❌ Lỗi khi xuất danh sách tiếp nhận: {e}")
 
     def export_dich_vu_report(self):
-        """Export dịch vụ report to Excel"""
+        """Export dịch vụ report to Excel with enhanced features"""
         try:
             dich_vu_list = self.controller.model.list_dich_vu()
             if not dich_vu_list:
                 print("❌ Không có dữ liệu dịch vụ để xuất!")
                 return
             
-            data = []
-            for dv in dich_vu_list:
-                data.append({
-                    'STT': len(data) + 1,
-                    'Mã dịch vụ': dv._ma_dv,
-                    'Tên dịch vụ': dv._ten_dv,
-                    'Giá (VNĐ)': dv._gia
-                })
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
             
-            filename = f"BaoCao_DichVu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            # Format data using utility functions
+            from report_utils import format_dich_vu_data
+            data = format_dich_vu_data(dich_vu_list)
             
-            try:
-                import pandas as pd
-                df = pd.DataFrame(data)
-                df.to_excel(filename, index=False, sheet_name='Báo cáo dịch vụ')
-                print(f"✅ Đã xuất file Excel: {filename}")
-            except ImportError:
-                import csv
-                csv_filename = filename.replace('.xlsx', '.csv')
-                with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-                    if data:
-                        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
-                        writer.writeheader()
-                        writer.writerows(data)
-                print(f"✅ Đã xuất file CSV: {csv_filename}")
+            # Generate filename and path
+            filename = report_mgr.generate_filename("BaoCao_DichVu", "xlsx")
+            filepath = report_mgr.get_report_path("dich_vu", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                "Báo cáo dịch vụ",
+                "🩺 BÁO CÁO DỊCH VỤ",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo dịch vụ: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Tổng số bản ghi: {len(data)}")
+            else:
+                print("❌ Không thể xuất file!")
                 
         except Exception as e:
-            print(f"❌ Lỗi khi xuất file: {e}")
+            print(f"❌ Lỗi khi xuất báo cáo dịch vụ: {e}")
 
     def export_phong_kham_report(self):
-        """Export phòng khám report to Excel"""
+        """Export phòng khám report to Excel with enhanced features"""
         try:
             phong_kham_list = self.controller.model.list_phong_kham()
             if not phong_kham_list:
                 print("❌ Không có dữ liệu phòng khám để xuất!")
                 return
             
-            data = []
-            for pk in phong_kham_list:
-                data.append({
-                    'STT': len(data) + 1,
-                    'Mã phòng': pk._ma_phong,
-                    'Tên phòng': pk._ten_phong
-                })
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
             
-            filename = f"BaoCao_PhongKham_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            # Format data using utility functions
+            from report_utils import format_phong_kham_data
+            data = format_phong_kham_data(phong_kham_list)
             
-            try:
-                import pandas as pd
-                df = pd.DataFrame(data)
-                df.to_excel(filename, index=False, sheet_name='Báo cáo phòng khám')
-                print(f"✅ Đã xuất file Excel: {filename}")
-            except ImportError:
-                import csv
-                csv_filename = filename.replace('.xlsx', '.csv')
-                with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-                    if data:
-                        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
-                        writer.writeheader()
-                        writer.writerows(data)
-                print(f"✅ Đã xuất file CSV: {csv_filename}")
+            # Generate filename and path
+            filename = report_mgr.generate_filename("BaoCao_PhongKham", "xlsx")
+            filepath = report_mgr.get_report_path("phong_kham", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                "Báo cáo phòng khám",
+                "🏥 BÁO CÁO PHÒNG KHÁM",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo phòng khám: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Tổng số bản ghi: {len(data)}")
+            else:
+                print("❌ Không thể xuất file!")
                 
         except Exception as e:
-            print(f"❌ Lỗi khi xuất file: {e}")
+            print(f"❌ Lỗi khi xuất báo cáo phòng khám: {e}")
 
     def export_summary_report(self):
-        """Export summary report to Excel"""
+        """Export comprehensive summary report with multiple sheets"""
         try:
             # Get all data
             benh_nhan_list = self.controller.model.list_benh_nhan()
@@ -901,59 +1078,196 @@ class MenuManager:
             dich_vu_list = self.controller.model.list_dich_vu()
             phong_kham_list = self.controller.model.list_phong_kham()
             
-            # Summary data
-            summary_data = [{
-                'Chỉ số': 'Tổng số bệnh nhân',
-                'Giá trị': len(benh_nhan_list)
-            }, {
-                'Chỉ số': 'Tổng số tiếp nhận',
-                'Giá trị': len(tiep_nhan_list)
-            }, {
-                'Chỉ số': 'Tổng số dịch vụ',
-                'Giá trị': len(dich_vu_list)
-            }, {
-                'Chỉ số': 'Tổng số phòng khám',
-                'Giá trị': len(phong_kham_list)
-            }]
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
             
-            filename = f"BaoCao_TongHop_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+            # Prepare data for multiple sheets
+            from report_utils import (
+                format_benh_nhan_data, format_tiep_nhan_data, 
+                format_dich_vu_data, format_phong_kham_data
+            )
             
-            try:
-                import pandas as pd
-                
-                # Create Excel writer
-                with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-                    # Summary sheet
-                    pd.DataFrame(summary_data).to_excel(writer, sheet_name='Tổng hợp', index=False)
-                    
-                    # Detailed sheets
-                    if benh_nhan_list:
-                        bn_data = [{'Mã BN': bn.ma_bn, 'PID': bn.pid, 'Họ tên': bn._ho_ten, 
-                                   'Giới tính': bn._gioi_tinh, 'Năm sinh': bn._nam_sinh, 'CCCD': bn._so_cccd} 
-                                   for bn in benh_nhan_list]
-                        pd.DataFrame(bn_data).to_excel(writer, sheet_name='Bệnh nhân', index=False)
-                    
-                    if tiep_nhan_list:
-                        tn_data = [{'Mã TN': tn._ma_tn, 'Tên BN': tn._bn._ho_ten, 
-                                   'Dịch vụ': tn._dv._ten_dv if tn._dv else "N/A",
-                                   'Phòng': tn._pk._ten_phong if tn._pk else "N/A"} 
-                                   for tn in tiep_nhan_list]
-                        pd.DataFrame(tn_data).to_excel(writer, sheet_name='Tiếp nhận', index=False)
-                
+            data_dict = {}
+            
+            # Summary overview
+            summary_data = [
+                {'Chỉ số': 'Tổng số bệnh nhân', 'Giá trị': len(benh_nhan_list)},
+                {'Chỉ số': 'Tổng số tiếp nhận', 'Giá trị': len(tiep_nhan_list)},
+                {'Chỉ số': 'Tổng số dịch vụ', 'Giá trị': len(dich_vu_list)},
+                {'Chỉ số': 'Tổng số phòng khám', 'Giá trị': len(phong_kham_list)},
+                {'Chỉ số': 'Thời điểm xuất báo cáo', 'Giá trị': datetime.now().strftime('%d/%m/%Y %H:%M:%S')}
+            ]
+            data_dict['Tổng hợp'] = summary_data
+            
+            # Add detailed sheets
+            if benh_nhan_list:
+                data_dict['Chi tiết bệnh nhân'] = format_benh_nhan_data(benh_nhan_list)
+            if tiep_nhan_list:
+                data_dict['Chi tiết tiếp nhận'] = format_tiep_nhan_data(tiep_nhan_list)
+            if dich_vu_list:
+                data_dict['Chi tiết dịch vụ'] = format_dich_vu_data(dich_vu_list)
+            if phong_kham_list:
+                data_dict['Chi tiết phòng khám'] = format_phong_kham_data(phong_kham_list)
+            
+            # Generate filename and path
+            filename = report_mgr.generate_filename("BaoCao_TongHop_ChiTiet", "xlsx")
+            filepath = report_mgr.get_report_path("tong_hop", filename)
+            
+            # Create summary report
+            result_path = report_mgr.create_summary_report(
+                data_dict, 
+                filepath,
+                "📊 BÁO CÁO TỔNG HỢP HỆ THỐNG",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
                 print(f"✅ Đã xuất báo cáo tổng hợp: {filename}")
-                
-            except ImportError:
-                # Fallback to CSV
-                import csv
-                csv_filename = filename.replace('.xlsx', '.csv')
-                with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=['Chỉ số', 'Giá trị'])
-                    writer.writeheader()
-                    writer.writerows(summary_data)
-                print(f"✅ Đã xuất báo cáo tổng hợp: {csv_filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📄 Số sheets: {len(data_dict)}")
+                for sheet_name, sheet_data in data_dict.items():
+                    print(f"   • {sheet_name}: {len(sheet_data) if isinstance(sheet_data, list) else 'N/A'} bản ghi")
+            else:
+                print("❌ Không thể xuất báo cáo tổng hợp!")
                 
         except Exception as e:
-            print(f"❌ Lỗi khi xuất báo cáo: {e}")
+            print(f"❌ Lỗi khi xuất báo cáo tổng hợp: {e}")
+
+    # =============== NEW STATISTICAL REPORTS ===============
+    
+    def export_statistical_report(self):
+        """Export comprehensive statistical report"""
+        try:
+            report_mgr = self.__init_report_manager()
+            result_path = report_mgr.export_statistical_report(
+                self.controller.model, 
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo thống kê: {os.path.basename(result_path)}")
+                print(f"📁 Vị trí file: {result_path}")
+            else:
+                print("❌ Không thể xuất báo cáo thống kê!")
+                
+        except Exception as e:
+            print(f"❌ Lỗi khi xuất báo cáo thống kê: {e}")
+
+    def export_revenue_report(self):
+        """Export revenue analysis report"""
+        try:
+            report_mgr = self.__init_report_manager()
+            result_path = report_mgr.export_revenue_report(
+                self.controller.model, 
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo doanh thu: {os.path.basename(result_path)}")
+                print(f"📁 Vị trí file: {result_path}")
+            else:
+                print("❌ Không thể xuất báo cáo doanh thu!")
+                
+        except Exception as e:
+            print(f"❌ Lỗi khi xuất báo cáo doanh thu: {e}")
+
+    def export_bac_si_report(self):
+        """Export bác sĩ report with clinic assignments"""
+        try:
+            # Get bác sĩ data
+            try:
+                bac_si_list = self.controller.model.list_bac_si()
+            except:
+                print("❌ Không thể lấy danh sách bác sĩ!")
+                return
+            
+            if not bac_si_list:
+                print("❌ Không có dữ liệu bác sĩ để xuất!")
+                return
+            
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
+            
+            # Format data using utility functions
+            from report_utils import format_bac_si_data
+            data = format_bac_si_data(bac_si_list)
+            
+            # Generate filename and path
+            filename = report_mgr.generate_filename("BaoCao_BacSi", "xlsx")
+            filepath = report_mgr.get_report_path("phong_kham", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                "Báo cáo bác sĩ",
+                "⚕️ BÁO CÁO BÁC SĨ",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo bác sĩ: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Tổng số bản ghi: {len(data)}")
+            else:
+                print("❌ Không thể xuất file!")
+                
+        except Exception as e:
+            print(f"❌ Lỗi khi xuất báo cáo bác sĩ: {e}")
+
+    def export_daily_report(self):
+        """Export daily activity report"""
+        try:
+            from datetime import date
+            today = date.today()
+            
+            # Filter today's tiếp nhận
+            tiep_nhan_list = self.controller.model.list_tiep_nhan()
+            today_tiep_nhan = []
+            
+            for tn in tiep_nhan_list:
+                # Giả sử có thuộc tính ngay_tao
+                if hasattr(tn, 'ngay_tao') and tn.ngay_tao:
+                    tn_date = tn.ngay_tao.date() if hasattr(tn.ngay_tao, 'date') else tn.ngay_tao
+                    if tn_date == today:
+                        today_tiep_nhan.append(tn)
+            
+            if not today_tiep_nhan:
+                print(f"❌ Không có dữ liệu tiếp nhận ngày {today.strftime('%d/%m/%Y')}!")
+                return
+            
+            # Initialize report manager
+            report_mgr = self.__init_report_manager()
+            
+            # Format data
+            from report_utils import format_tiep_nhan_data
+            data = format_tiep_nhan_data(today_tiep_nhan)
+            
+            # Generate filename and path
+            filename = report_mgr.generate_filename(
+                "BaoCao_NgayHienTai", "xlsx", 
+                suffix=today.strftime('%Y%m%d')
+            )
+            filepath = report_mgr.get_report_path("thong_ke", filename)
+            
+            # Create Excel with styling
+            result_path = report_mgr.create_excel_with_styling(
+                data, 
+                filepath,
+                f"Báo cáo ngày {today.strftime('%d/%m/%Y')}",
+                f"📅 BÁO CÁO HOẠT ĐỘNG NGÀY {today.strftime('%d/%m/%Y')}",
+                f"{self.user_role} - {self.username}"
+            )
+            
+            if result_path:
+                print(f"✅ Đã xuất báo cáo ngày {today.strftime('%d/%m/%Y')}: {filename}")
+                print(f"📁 Vị trí file: {filepath}")
+                print(f"📊 Số tiếp nhận trong ngày: {len(data)}")
+            else:
+                print("❌ Không thể xuất báo cáo ngày!")
+                
+        except Exception as e:
+            print(f"❌ Lỗi khi xuất báo cáo ngày: {e}")
 
 
     # ===== BÁC SĨ MANAGEMENT METHODS =====
@@ -983,7 +1297,7 @@ class MenuManager:
                 print("❌ Mã bác sĩ không được để trống!")
                 return
             
-            confirm = input(f"Bạn có chắc chắn muốn xóa bác sĩ {ma_bs}? (y/N): ").strip().lower()
+            confirm = input(f"Bạn có chắc chắn muốn xóa bác sĩ {ma_bs}? (y/n): ").strip().lower()
             if confirm == 'y':
                 self.controller.xoa_bac_si(ma_bs)
             else:
@@ -995,9 +1309,9 @@ class MenuManager:
         """Assign bac si to phong kham"""
         try:
             print("📋 Danh sách bác sĩ hiện tại:")
-            self.controller.hien_thi_ds_bac_si()
+            self.controller.hien_thi_danh_sach_bac_si_cho_user()
             print("\n📋 Danh sách phòng khám:")
-            self.controller.hien_thi_ds_phong_kham()
+            self.controller.hien_thi_danh_sach_phong_kham_cho_user()
             
             ma_bs = input("\nNhập mã bác sĩ: ").strip()
             ma_phong = input("Nhập mã phòng khám (để trống để hủy gán): ").strip()
@@ -1054,11 +1368,8 @@ class MenuManager:
             print("   • Tạo các bảng hành chính mới theo NQ 202/2025/QH15")
             print("   • Mapping dữ liệu từ 63 tỉnh cũ sang 34 đơn vị mới")
             print("   • Cập nhật thông tin tỉnh của tất cả bệnh nhân")
-            print("   • Bảo toàn dữ liệu gốc trong cột 'Tinh' và thêm cột 'TinhMoi'")
             print("="*60)
             
-            # Kiểm tra tình trạng migration hiện tại
-            print("🔍 KIỂM TRA TÌNH TRẠNG HIỆN TẠI:")
             check_migration_status()
             
             print("\n" + "⚠️ " + "="*58)
@@ -1066,10 +1377,9 @@ class MenuManager:
             print("  Nên backup database trước khi thực hiện migration!")
             print("="*60)
             
-            confirm = input("Bạn có chắc chắn muốn thực hiện migration? (y/N): ").strip().lower()
+            confirm = input("Bạn có chắc chắn muốn thực hiện migration? (y/n): ").strip().lower()
             
             if confirm == 'y':
-                print("\n🚀 Bắt đầu migration...")
                 success = run_full_migration()
                 if success:
                     print("\n✅ Migration hoàn thành thành công!")
@@ -1105,7 +1415,7 @@ def main():
         print("❌ Sai tài khoản hoặc mật khẩu!")
         return
 
-    print(f"✅ Xin chào {username}! Quyền: {user._role}")
+    print(f"👋 Xin chào {'Quản trị viên' if user._role == 'ADMIN' else f'Bệnh nhân {username}'}! Quyền: {user._role}")
     
     # Initialize menu manager and start
     menu_manager = MenuManager(controller, user._user_id, user._role, username)

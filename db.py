@@ -58,7 +58,6 @@ def create_database_if_not_exists():
         return False
 
 def get_conn():
-    """Lấy kết nối đến database"""
     try:
         return pyodbc.connect(CONN_STR)
     except Exception as e:
@@ -67,17 +66,14 @@ def get_conn():
         raise
 
 def init_db(seed: bool = True) -> None:
-    """Khởi tạo schema database và dữ liệu cơ bản"""
     # Tạo database trước nếu chưa có
     if not create_database_if_not_exists():
         return False
     
-    print("🔧 Khởi tạo schema database...")
     conn = get_conn()
     cur = conn.cursor()
 
     # Tạo bảng User
-    print("  📋 Tạo bảng User...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='user' AND xtype='U')
     CREATE TABLE [user] (
@@ -90,7 +86,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo bảng PhongKham
-    print("  🏥 Tạo bảng PhongKham...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='PhongKham' AND xtype='U')
     CREATE TABLE PhongKham (
@@ -104,7 +99,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo bảng DM_DichVuKyThuat
-    print("  🩺 Tạo bảng DM_DichVuKyThuat...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='DM_DichVuKyThuat' AND xtype='U')
     CREATE TABLE DM_DichVuKyThuat (
@@ -118,7 +112,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo bảng BenhNhan
-    print("  👥 Tạo bảng BenhNhan...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BenhNhan' AND xtype='U')
     CREATE TABLE BenhNhan (
@@ -150,7 +143,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo bảng BacSi
-    print("  👨‍⚕️ Tạo bảng BacSi...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='BacSi' AND xtype='U')
     CREATE TABLE BacSi (
@@ -166,7 +158,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo bảng TiepNhan
-    print("  📋 Tạo bảng TiepNhan...")
     cur.execute("""
     IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='TiepNhan' AND xtype='U')
     CREATE TABLE TiepNhan (
@@ -183,7 +174,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     # Tạo Foreign Keys
-    print("  🔗 Tạo Foreign Key constraints...")
     
     # Drop existing FK constraints first (if any)
     cur.execute("""
@@ -242,7 +232,6 @@ def init_db(seed: bool = True) -> None:
     """)
 
     if seed:
-        print("  🌱 Tạo dữ liệu khởi tạo...")
         # Insert initial admin user
         cur.execute("""
         IF NOT EXISTS (SELECT 1 FROM [user] WHERE username = 'admin')
@@ -262,7 +251,6 @@ def init_db(seed: bool = True) -> None:
 
     conn.commit()
     conn.close()
-    print("✅ Database schema được khởi tạo thành công!")
     return True
 
 

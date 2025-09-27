@@ -135,29 +135,47 @@ class Controller:
 
     # 2. Tiếp nhận (đăng ký khám)
     def tiep_nhan(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> None:
-        bn = self.model.bn_repo.get_by_cccd(so_cccd)
-        if not bn:
-            self.view.print_message("Không tìm thấy bệnh nhân với CCCD đã nhập.")
-            return
-        dv = self.model.dv_repo.get_by_ma(ma_dv)
-        pk = self.model.pk_repo.get_by_ma(ma_pk)
-        if not dv or not pk:
-            self.view.print_message("Không tìm thấy dịch vụ hoặc phòng khám.")
-            return
+        # Use the enhanced method to get detailed information
+        tiep_nhan, chi_phi = self.tiep_nhan_enhanced(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
         
-        bs_id = ""
-        if ma_bs:
-            bs = self.model.bs_repo.get_by_ma(ma_bs)
-            if not bs:
-                self.view.print_message("Không tìm thấy bác sĩ với mã đã nhập.")
-                return
-            bs_id = bs.bs_id
+        if tiep_nhan and chi_phi is not None:
+            # Print success message
+            bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
+            self.view.print_message(f"Đăng ký thành công (id={tiep_nhan.ma_tn}). Chi phí tạm tính: {chi_phi:,}đ{bs_info}")
+            
+            # Print detailed registration information
+            self.in_thong_tin_tiep_nhan(tiep_nhan, chi_phi)
+
+    def in_thong_tin_tiep_nhan(self, tiep_nhan: 'TiepNhan', chi_phi: int) -> None:
+        """In thông tin chi tiết của tiếp nhận sau khi đăng ký"""
+        self.view.print_message("\n" + "="*60)
+        self.view.print_message("📋 THÔNG TIN TIẾP NHẬN")
+        self.view.print_message("="*60)
+        self.view.print_message(f"🆔 ID Tiếp nhận    : {tiep_nhan.ma_tn}")
+        self.view.print_message(f"📄 CCCD            : {tiep_nhan._bn.so_cccd}")
+        self.view.print_message(f"👤 Họ tên          : {tiep_nhan._bn._ho_ten}")
+        self.view.print_message(f"📝 Lý do khám      : {tiep_nhan._ly_do}")
+        self.view.print_message(f"🏥 Dịch vụ đăng ký : {tiep_nhan._dv._ma_dv} - {tiep_nhan._dv._ten_dv}")
+        self.view.print_message(f"🏠 Phòng khám      : {tiep_nhan._pk._ma_phong} - {tiep_nhan._pk._ten_phong}")
+        if tiep_nhan._bs:
+            self.view.print_message(f"👨‍⚕️ Bác sĩ          : {tiep_nhan._bs.ma_bs} - {tiep_nhan._bs.ho_ten} ({tiep_nhan._bs.chuyen_khoa})")
+        else:
+            self.view.print_message(f"👨‍⚕️ Bác sĩ          : Chưa chọn")
+        self.view.print_message(f"💰 Chi phí tạm tính: {chi_phi:,}đ")
+        self.view.print_message("="*60)
+
+    def tiep_nhan_cho_user(self, username: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> None:
+        """Đăng ký tiếp nhận cho user (username = CCCD)"""
+        # Use the enhanced method to get detailed information, username is CCCD
+        tiep_nhan, chi_phi = self.tiep_nhan_enhanced(username, ma_dv, ma_pk, ly_do, ma_bs)
         
-        # ma_tn will be auto-generated in the repository
-        tn_id = self.model.tn_repo.create(bn.bn_id, ly_do, dv.dv_id, pk.pk_id, bs_id)
-        chi_phi = ChiPhiKham.tinh_chi_phi(dv, pk)
-        bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
-        self.view.print_message(f"Đăng ký thành công (id={tn_id}). Chi phí tạm tính: {chi_phi:,}đ{bs_info}")
+        if tiep_nhan and chi_phi is not None:
+            # Print success message
+            bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
+            self.view.print_message(f"Đăng ký thành công (id={tiep_nhan.ma_tn}). Chi phí tạm tính: {chi_phi:,}đ{bs_info}")
+            
+            # Print detailed registration information
+            self.in_thong_tin_tiep_nhan(tiep_nhan, chi_phi)
 
     def tiep_nhan_enhanced(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> tuple:
         """Enhanced tiep nhan that returns TiepNhan object and cost for display"""
@@ -199,6 +217,60 @@ class Controller:
 
     def hien_thi_ds_dich_vu(self):
         self.view.print_list(self.model.list_dich_vu())
+    
+    def hien_thi_danh_sach_dich_vu_cho_user(self):
+        """Hiển thị danh sách dịch vụ với định dạng đẹp cho user"""
+        dich_vu_list = self.model.list_dich_vu()
+        if not dich_vu_list:
+            self.view.print_message("📋 Không có dịch vụ nào!")
+            return
+        
+        self.view.print_message("\n🩺 DANH SÁCH DỊCH VỤ KHÁM")
+        self.view.print_message("="*60)
+        self.view.print_message(f"{'STT':<4} {'Mã DV':<8} {'Tên dịch vụ':<30} {'Giá tiền':<15}")
+        self.view.print_message("-"*60)
+        
+        for i, dv in enumerate(dich_vu_list, 1):
+            self.view.print_message(f"{i:<4} {dv._ma_dv:<8} {dv._ten_dv:<30} {dv._gia:,}đ")
+        
+        self.view.print_message("="*60)
+
+    def hien_thi_danh_sach_phong_kham_cho_user(self):
+        """Hiển thị danh sách phòng khám với định dạng đẹp cho user"""
+        phong_kham_list = self.model.list_phong_kham()
+        if not phong_kham_list:
+            self.view.print_message("📋 Không có phòng khám nào!")
+            return
+        
+        self.view.print_message("\n🏥 DANH SÁCH PHÒNG KHÁM")
+        self.view.print_message("="*80)
+        self.view.print_message(f"{'STT':<4} {'Mã PK':<8} {'Tên phòng khám':<25} {'Bác sĩ phụ trách':<35}")
+        self.view.print_message("-"*80)
+        
+        for i, pk in enumerate(phong_kham_list, 1):
+            bs_info = pk.ten_bac_si if hasattr(pk, 'ten_bac_si') and pk.ten_bac_si else "Chưa gán"
+            if pk._bac_si:
+                bs_info = pk._bac_si.ho_ten
+            self.view.print_message(f"{i:<4} {pk._ma_phong:<8} {pk._ten_phong:<25} {bs_info:<35}")
+        
+        self.view.print_message("="*80)
+
+    def hien_thi_danh_sach_bac_si_cho_user(self):
+        """Hiển thị danh sách bác sĩ với định dạng đẹp cho user"""
+        bac_si_list = self.model.list_bac_si()
+        if not bac_si_list:
+            self.view.print_message("📋 Không có bác sĩ nào!")
+            return
+        
+        self.view.print_message("\n👨‍⚕️ DANH SÁCH BÁC SĨ")
+        self.view.print_message("="*70)
+        self.view.print_message(f"{'STT':<4} {'Mã BS':<8} {'Họ tên':<25} {'Chuyên khoa':<25}")
+        self.view.print_message("-"*70)
+        
+        for i, bs in enumerate(bac_si_list, 1):
+            self.view.print_message(f"{i:<4} {bs.ma_bs:<8} {bs.ho_ten:<25} {bs.chuyen_khoa:<25}")
+        
+        self.view.print_message("="*70)
 
     def hien_thi_ds_tiep_nhan(self):
         self.view.print_list(self.model.list_tiep_nhan())
@@ -216,6 +288,47 @@ class Controller:
 
     def hien_thi_ds_bac_si(self):
         self.view.print_list(self.model.list_bac_si())
+
+    def hien_thi_danh_sach_benh_nhan_cho_admin(self):
+        """Hiển thị danh sách bệnh nhân với định dạng đẹp cho admin"""
+        benh_nhan_list = self.model.list_benh_nhan()
+        if not benh_nhan_list:
+            self.view.print_message("📋 Không có bệnh nhân nào!")
+            return
+        
+        self.view.print_message("\n👳 DANH SÁCH BỆNH NHÂN")
+        self.view.print_message("="*90)
+        self.view.print_message(f"{'STT':<4} {'Mã BN':<12} {'PID':<12} {'Họ tên':<20} {'Giới tính':<8} {'Năm sinh':<8} {'CCCD':<15}")
+        self.view.print_message("-"*90)
+        
+        for i, bn in enumerate(benh_nhan_list, 1):
+            self.view.print_message(f"{i:<4} {bn.ma_bn:<12} {bn.pid:<12} {bn._ho_ten:<20} {bn._gioi_tinh:<8} {bn.nam_sinh:<8} {bn.so_cccd:<15}")
+        
+        self.view.print_message("="*90)
+        self.view.print_message(f"📊 Tổng cộng: {len(benh_nhan_list)} bệnh nhân")
+
+    def hien_thi_danh_sach_tiep_nhan_cho_admin(self):
+        """Hiển thị danh sách tiếp nhận với định dạng đẹp cho admin"""
+        tiep_nhan_list = self.model.list_tiep_nhan()
+        if not tiep_nhan_list:
+            self.view.print_message("📋 Không có tiếp nhận nào!")
+            return
+        
+        self.view.print_message("\n📋 DANH SÁCH TIẾP NHẬN")
+        self.view.print_message("="*120)
+        self.view.print_message(f"{'STT':<4} {'Mã TN':<12} {'Tên BN':<25} {'CCCD':<13} {'Dịch vụ':<30} {'Phòng khám':<25} {'Bác sĩ':<30} {'Lý do':<30}")
+        self.view.print_message("-"*120)
+        
+        for i, tn in enumerate(tiep_nhan_list, 1):
+            dv_name = tn._dv._ten_dv[:30] + "..." if len(tn._dv._ten_dv) > 30 else tn._dv._ten_dv if tn._dv else "N/A"
+            pk_name = tn._pk._ten_phong[:30] + "..." if len(tn._pk._ten_phong) > 30 else tn._pk._ten_phong if tn._pk else "N/A"
+            bs_name = tn._bs.ho_ten[:30] + "..." if tn._bs and len(tn._bs.ho_ten) > 30 else (tn._bs.ho_ten if tn._bs else "Chưa gán")
+            ly_do = tn._ly_do[:30] + "..." if len(tn._ly_do) > 30 else tn._ly_do
+
+            self.view.print_message(f"{i:<4} {tn._ma_tn:<12} {tn._bn._ho_ten:<25} {tn._bn.so_cccd:<13} {dv_name:<30} {pk_name:<25} {bs_name:<30} {ly_do:<30}")
+
+        self.view.print_message("="*120)
+        self.view.print_message(f"📊 Tổng cộng: {len(tiep_nhan_list)} tiếp nhận")
 
     # 4. Hủy tiếp nhận
     def huy_tiep_nhan(self, ma_tn: str):

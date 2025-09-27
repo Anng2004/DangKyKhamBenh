@@ -207,7 +207,7 @@ def input_gender_with_recommendation(cccd: str) -> str:
     
     if gender_cccd:
         print(f"💡 Hệ thống phân tích từ CCCD: Giới tính = {gender_cccd}")
-        confirm = input(f"Xác nhận giới tính là '{gender_cccd}'? (Y/n): ").strip().lower()
+        confirm = input(f"Xác nhận giới tính là '{gender_cccd}'? (y/n): ").strip().lower()
         if not confirm or confirm in ['y', 'yes']:
             return gender_cccd
     
@@ -239,7 +239,7 @@ def input_province_with_recommendation(cccd: str) -> str:
         if province_old and province_new and province_old != province_new:
             print(f"   (Cũ: {province_old} → Mới: {province_new})")
         
-        confirm = input(f"Xác nhận tỉnh/TP là '{recommended_province}'? (Y/n): ").strip().lower()
+        confirm = input(f"Xác nhận tỉnh/TP là '{recommended_province}'? (y/n): ").strip().lower()
         if not confirm or confirm in ['y', 'yes']:
             return recommended_province
     
@@ -344,7 +344,7 @@ def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
     print(f"📋 Mã tiếp nhận: {tiep_nhan._ma_tn}")
     print(f"📅 Ngày đăng ký: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
     
-    print(f"\n👤 THÔNG TIN BỆNH NHÂN:")
+    print(f"\n👳 THÔNG TIN BỆNH NHÂN:")
     print(f"   🆔 Mã BN: {tiep_nhan._bn.ma_bn}")
     print(f"   📋 PID: {tiep_nhan._bn.pid}")
     print(f"   👤 Họ tên: {tiep_nhan._bn._ho_ten}")
@@ -391,7 +391,7 @@ def confirm_with_default_yes(message: str) -> bool:
     Returns:
         bool: True for yes, False for no
     """
-    response = input(f"{message} (Y/n): ").strip().lower()
+    response = input(f"{message} (y/n): ").strip().lower()
     return not response or response in ['y', 'yes']
 
 def input_province_with_validation() -> str:
