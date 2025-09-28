@@ -2,8 +2,8 @@
 REM run.bat - Script chạy ứng dụng trên Windows
 
 cls
-echo 🏥 HỆ THỐNG QUẢN LÝ KHÁM BỆNH - NÂNG CAP
-echo 📊 Với tính năng Báo cáo ^& Xuất Excel chuyên nghiệp
+echo 🏥 HỆ THỐNG QUẢN LÝ KHÁM BỆNH
+echo 📊 Báo cáo Excel + 🔍 Lịch sử khám nâng cao
 echo ================================================
 echo.
 

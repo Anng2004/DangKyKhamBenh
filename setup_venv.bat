@@ -72,6 +72,9 @@ echo • 🎨 Excel styling chuyên nghiệp
 echo • 📊 Phân tích thống kê ^& doanh thu  
 echo • 📁 Quản lý file báo cáo tự động
 echo • 💾 Hỗ trợ CSV fallback
+echo • 🔍 Hệ thống lịch sử khám nâng cao cho User
+echo • 🗓️ Hiển thị ngày khám chính xác
+echo • 🔎 Tìm kiếm theo mã tiếp nhận
 echo.
 echo 📝 LƯU Ý: Cần cấu hình kết nối SQL Server trong file db.py
 pause

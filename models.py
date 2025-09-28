@@ -2,6 +2,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Optional
+from utils.message_utils import error, success, warning, info
 
 # ===== Abstracts =====
 class AbsEntity(ABC):
@@ -169,7 +170,7 @@ class BenhNhan(AbsEntity):
 
 
 class TiepNhan(AbsEntity):
-    def __init__(self, tn_id: str, ma_tn: str, bn: BenhNhan, ly_do: str, dv: DichVu, pk: PhongKham, bs: Optional[BacSi] = None):
+    def __init__(self, tn_id: str, ma_tn: str, bn: BenhNhan, ly_do: str, dv: DichVu, pk: PhongKham, bs: Optional[BacSi] = None, created_at: str = ""):
         self._tn_id = tn_id
         self._ma_tn = ma_tn
         self._bn = bn
@@ -177,13 +178,15 @@ class TiepNhan(AbsEntity):
         self._dv = dv
         self._pk = pk
         self._bs = bs
+        self._created_at = created_at
 
     def __str__(self) -> str:
         bs_info = f" | BS: {self._bs.ma_bs}-{self._bs.ho_ten} ({self._bs.chuyen_khoa})" if self._bs else " | BS: Chưa chọn"
         dv_info = f"{self._dv._ma_dv}-{self._dv._ten_dv} ({self._dv._gia:,}đ)" if self._dv else "Chưa chọn dịch vụ"
         pk_info = f"{self._pk._ma_phong}-{self._pk._ten_phong}" if self._pk else "Chưa chọn phòng khám"
+        date_info = f" | Ngày: {self._created_at[:10]}" if self._created_at else ""
         return (f"[TiepNhan: {self._ma_tn} | BN: {self._bn.ma_bn}-{self._bn._ho_ten} ({self._bn._gioi_tinh}, {self._bn._nam_sinh}) | "
-                f"DV: {dv_info} | PK: {pk_info}{bs_info} | Lý do: {self._ly_do}]")
+                f"DV: {dv_info} | PK: {pk_info}{bs_info} | Lý do: {self._ly_do}{date_info}]")
 
     @property
     def tn_id(self) -> str: return self._tn_id
@@ -191,6 +194,8 @@ class TiepNhan(AbsEntity):
     def ma_tn(self) -> str: return self._ma_tn
     @property
     def bac_si(self) -> Optional[BacSi]: return self._bs
+    @property
+    def created_at(self) -> str: return self._created_at
 
 # ===== Domain service =====
 class ChiPhiKham:

@@ -2,29 +2,26 @@
 
 import sys
 from db import get_conn, init_db
+from utils.message_utils import error, success, warning, info, print_separator
 
 def check_database_ready():
-    """Kiểm tra database đã sẵn sàng chưa"""
     try:
         conn = get_conn()
         cur = conn.cursor()
         
-        # Kiểm tra bảng chính có tồn tại không
         cur.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME IN ('user', 'PhongKham', 'DM_DichVuKyThuat', 'BacSi')")
         table_count = cur.fetchone()[0]
         
         conn.close()
         return table_count >= 4
     except Exception as e:
-        print(f"❌ Lỗi kết nối database: {e}")
+        error(f"Lỗi kết nối database: {e}")
         return False
 
 def import_phong_kham():
-    """Import thêm dữ liệu phòng khám"""
     conn = get_conn()
     cur = conn.cursor()
     
-    # Dữ liệu phòng khám mẫu
     phong_kham_data = [
         ('PK002', 'Phòng Nhi khoa'),
         ('PK003', 'Phòng Sản phụ khoa'),
@@ -40,13 +37,12 @@ def import_phong_kham():
         ('PK013', 'Phòng Siêu âm'),
         ('PK014', 'Phòng Xét nghiệm'),
         ('PK015', 'Phòng Phục hồi chức năng'),
-        ('PK02', 'Phòng cấp cứu')  # Phòng bổ sung
+        ('PK016', 'Phòng cấp cứu')
     ]
     
     print("🏥 Đang import dữ liệu Phòng khám...")
     for ma_phong, ten_phong in phong_kham_data:
         try:
-            # Check if already exists
             cur.execute("SELECT COUNT(*) FROM PhongKham WHERE MaPhong = ?", (ma_phong,))
             exists = cur.fetchone()[0]
             
@@ -55,21 +51,18 @@ def import_phong_kham():
                     INSERT INTO PhongKham(PK_ID, MaPhong, TenPhong) 
                     VALUES (NEWID(), ?, ?)
                 """, (ma_phong, ten_phong))
-                print(f"  ✅ Đã thêm: {ma_phong} - {ten_phong}")
+                success(f"Đã thêm: {ma_phong} - {ten_phong}")
             else:
-                print(f"  ⚠️  Đã tồn tại: {ma_phong} - {ten_phong}")
+                warning(f"Đã tồn tại: {ma_phong} - {ten_phong}")
         except Exception as e:
-            print(f"  ❌ Lỗi khi thêm {ma_phong}: {e}")
-    
+            error(f"Lỗi khi thêm {ma_phong}: {e}")
     conn.commit()
     conn.close()
 
 def import_dich_vu():
-    """Import thêm dữ liệu dịch vụ"""
     conn = get_conn()
     cur = conn.cursor()
     
-    # Dữ liệu dịch vụ mẫu
     dich_vu_data = [
         ('DV002', 'Khám chuyên khoa Nhi', 120000),
         ('DV003', 'Khám Sản phụ khoa', 150000),
@@ -100,7 +93,6 @@ def import_dich_vu():
     print("🩺 Đang import dữ liệu Dịch vụ...")
     for ma_dv, ten_dv, gia in dich_vu_data:
         try:
-            # Check if already exists
             cur.execute("SELECT COUNT(*) FROM DM_DichVuKyThuat WHERE MaDichVu = ?", (ma_dv,))
             exists = cur.fetchone()[0]
             
@@ -109,21 +101,19 @@ def import_dich_vu():
                     INSERT INTO DM_DichVuKyThuat(dv_id, MaDichVu, TenDichVu, GiaDichVu) 
                     VALUES (NEWID(), ?, ?, ?)
                 """, (ma_dv, ten_dv, gia))
-                print(f"  ✅ Đã thêm: {ma_dv} - {ten_dv} - {gia:,}đ")
+                success(f"Đã thêm: {ma_dv} - {ten_dv} - {gia:,}đ")
             else:
-                print(f"  ⚠️  Đã tồn tại: {ma_dv} - {ten_dv}")
+                warning(f"Đã tồn tại: {ma_dv} - {ten_dv}")
         except Exception as e:
-            print(f"  ❌ Lỗi khi thêm {ma_dv}: {e}")
-    
+            error(f"Lỗi khi thêm {ma_dv}: {e}")
+
     conn.commit()
     conn.close()
 
 def import_bac_si():
-    """Import dữ liệu bác sĩ"""
     conn = get_conn()
     cur = conn.cursor()
     
-    # Dữ liệu bác sĩ (không có PK_ID, sẽ assign sau)
     bac_si_data = [
         ('BS001', 'BS. Nguyễn Văn An', 'Nội tổng quát', '0901234567', 'bs.an@hospital.com'),
         ('BS002', 'TS.BS. Trần Thị Bình', 'Nhi khoa', '0907654321', 'bs.binh@hospital.com'),
@@ -142,10 +132,9 @@ def import_bac_si():
         ('BS015', 'BS. Lương Văn Sơn', 'Phục hồi chức năng', '0923456012', 'bs.son@hospital.com'),
     ]
     
-    print("👨‍⚕️ Đang import dữ liệu Bác sĩ...")
+    info("👨‍⚕️ Đang import dữ liệu Bác sĩ...")
     for ma_bs, ho_ten, chuyen_khoa, sdt, email in bac_si_data:
         try:
-            # Check if already exists
             cur.execute("SELECT COUNT(*) FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
             exists = cur.fetchone()[0]
             
@@ -154,87 +143,79 @@ def import_bac_si():
                     INSERT INTO BacSi(MaBacSi, HoTen, ChuyenKhoa, SoDienThoai, Email) 
                     VALUES (?, ?, ?, ?, ?)
                 """, (ma_bs, ho_ten, chuyen_khoa, sdt, email))
-                print(f"  ✅ Đã thêm: {ma_bs} - {ho_ten} - {chuyen_khoa}")
+                success(f"  Đã thêm: {ma_bs} - {ho_ten} - {chuyen_khoa}")
             else:
-                print(f"  ⚠️  Đã tồn tại: {ma_bs} - {ho_ten}")
+                warning(f"  Đã tồn tại: {ma_bs} - {ho_ten}")
         except Exception as e:
-            print(f"  ❌ Lỗi khi thêm {ma_bs}: {e}")
+            error(f"  Lỗi khi thêm {ma_bs}: {e}")
     
     conn.commit()
     conn.close()
 
 def assign_doctors_to_clinics():
-    """Gán bác sĩ vào phòng khám"""
     conn = get_conn()
     cur = conn.cursor()
     
-    # Mapping bác sĩ - phòng khám
     assignments = [
-        ('BS001', 'PK001'),  # BS. Nguyễn Văn An -> Phòng Nội tổng quát
-        ('BS002', 'PK002'),  # TS.BS. Trần Thị Bình -> Phòng Nhi khoa
-        ('BS003', 'PK003'),  # PGS.TS. Lê Văn Cường -> Phòng Sản phụ khoa
-        ('BS004', 'PK004'),  # BS. Phạm Thị Dung -> Phòng Tai Mũi Họng
-        ('BS005', 'PK005'),  # BS. Hoàng Minh Tuan -> Phòng Mắt
-        ('BS006', 'PK006'),  # BS. Đinh Thị Hoa -> Phòng Da liễu
-        ('BS007', 'PK007'),  # GS.TS. Vũ Công Minh -> Phòng Tim mạch
-        ('BS008', 'PK008'),  # PGS. Ngô Thị Linh -> Phòng Thần kinh
-        ('BS009', 'PK009'),  # BS. Bùi Văn Khoa -> Phòng Cơ xương khớp
-        ('BS010', 'PK010'),  # TS.BS. Mai Thị Lan -> Phòng Ung bướu
-        ('BS011', 'PK011'),  # BS. Trịnh Văn Nam -> Phòng Cấp cứu
-        ('BS012', 'PK012'),  # BS. Lý Thị Oanh -> Phòng X-Quang
-        ('BS013', 'PK012'),  # BS. Đỗ Minh Phú -> Phòng X-Quang (shared)
-        ('BS014', 'PK014'),  # BS. Cao Thị Quyên -> Phòng Xét nghiệm
-        ('BS015', 'PK015'),  # BS. Lương Văn Sơn -> Phòng Phục hồi chức năng
+        ('BS001', 'PK001'),
+        ('BS002', 'PK002'),
+        ('BS003', 'PK003'),
+        ('BS004', 'PK004'),
+        ('BS005', 'PK005'),
+        ('BS006', 'PK006'),
+        ('BS007', 'PK007'),
+        ('BS008', 'PK008'),
+        ('BS009', 'PK009'),
+        ('BS010', 'PK010'),
+        ('BS011', 'PK011'),
+        ('BS012', 'PK012'),
+        ('BS013', 'PK012'),
+        ('BS014', 'PK014'),
+        ('BS015', 'PK015'),
     ]
     
     print("🔄 Đang gán bác sĩ vào phòng khám...")
     for ma_bs, ma_pk in assignments:
         try:
-            # Get BS_ID and PK_ID
             cur.execute("SELECT BS_ID FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
             bs_row = cur.fetchone()
             if not bs_row:
-                print(f"  ❌ Không tìm thấy bác sĩ {ma_bs}")
+                error(f"Không tìm thấy bác sĩ {ma_bs}")
                 continue
             bs_id = bs_row.BS_ID
             
             cur.execute("SELECT PK_ID FROM PhongKham WHERE MaPhong = ?", (ma_pk,))
             pk_row = cur.fetchone()
             if not pk_row:
-                print(f"  ❌ Không tìm thấy phòng khám {ma_pk}")
+                error(f"Không tìm thấy phòng khám {ma_pk}")
                 continue
             pk_id = pk_row.PK_ID
             
-            # Update PhongKham with BS_ID (one doctor per clinic for primary assignment)
             cur.execute("SELECT BS_ID FROM PhongKham WHERE PK_ID = ?", (pk_id,))
             current_bs = cur.fetchone()
             
             if not current_bs or current_bs.BS_ID is None:
                 cur.execute("UPDATE PhongKham SET BS_ID = ? WHERE PK_ID = ?", (bs_id, pk_id))
-                print(f"  ✅ Đã gán bác sĩ {ma_bs} vào phòng khám {ma_pk}")
+                success(f"Đã gán bác sĩ {ma_bs} vào phòng khám {ma_pk}")
             else:
-                print(f"  ⚠️  Phòng khám {ma_pk} đã có bác sĩ chính")
-                
+                warning(f"Phòng khám {ma_pk} đã có bác sĩ chính")
+
         except Exception as e:
-            print(f"  ❌ Lỗi khi gán {ma_bs}: {e}")
-    
+            error(f"Lỗi khi gán {ma_bs}: {e}")
+
     conn.commit()
     conn.close()
 
 def show_statistics():
-    """Hiển thị thống kê sau khi import"""
     conn = get_conn()
     cur = conn.cursor()
     
-    # Đếm phòng khám
     cur.execute("SELECT COUNT(*) FROM PhongKham")
     pk_count = cur.fetchone()[0]
     
-    # Đếm dịch vụ
     cur.execute("SELECT COUNT(*) FROM DM_DichVuKyThuat")
     dv_count = cur.fetchone()[0]
     
-    # Đếm bác sĩ
     cur.execute("SELECT COUNT(*) FROM BacSi")
     bs_count = cur.fetchone()[0]
     
@@ -242,48 +223,42 @@ def show_statistics():
     
     print("\n" + "="*50)
     print("           📊 THỐNG KÊ SAU IMPORT")
-    print("="*50)
+    print_separator(50,"=")
     print(f"🏥 Tổng số Phòng khám: {pk_count}")
     print(f"🩺 Tổng số Dịch vụ: {dv_count}")
     print(f"👨‍⚕️ Tổng số Bác sĩ: {bs_count}")
-    print("="*50)
+    print_separator(50,"=")
 
 def main():
-    print("="*60)
+    print_separator(60,"=")
     print("     🚀 IMPORT DỮ LIỆU MẪU - PHÒNG KHÁM, DỊCH VỤ & BÁC SĨ")
-    print("="*60)
+    print_separator(60,"=")
     
     try:
-        # Import phòng khám
         import_phong_kham()
         print()
         
-        # Import dịch vụ
         import_dich_vu()
         print()
         
-        # Import bác sĩ
         import_bac_si()
         print()
         
-        # Hiển thị thống kê
         show_statistics()
         
-        print("\n🎉 Import hoàn tất!")
+        print("\nImport hoàn tất!")
         
     except Exception as e:
-        print(f"❌ Lỗi trong quá trình import: {e}")
+        error(f"Lỗi trong quá trình import: {e}")
 
 def main():
     """Main function to import sample data"""
-    print("🚀 Bắt đầu import dữ liệu mẫu...")
-    print("=" * 60)
+    print("Bắt đầu import dữ liệu mẫu...")
+    print_separator(60,"=")
     
     try:
-        # Check database connection first
         check_database_ready()
         
-        # Import data in correct order
         import_phong_kham()
         print()
         
@@ -296,13 +271,8 @@ def main():
         assign_doctors_to_clinics()
         print()
         
-        print("=" * 60)
-        print("✅ Hoàn thành import dữ liệu mẫu!")
-        print("📊 Dữ liệu đã sẵn sàng để sử dụng")
-        print()
-        print("🔍 Kiểm tra dữ liệu đã import:")
-        
-        # Show summary
+        print_separator(60,"=")
+        success("Hoàn thành import dữ liệu mẫu!")
         conn = get_conn()
         cur = conn.cursor()
         
@@ -321,7 +291,7 @@ def main():
         conn.close()
         
     except Exception as e:
-        print(f"❌ Lỗi khi import dữ liệu: {e}")
+        error(f"Lỗi khi import dữ liệu: {e}")
         print("💡 Vui lòng kiểm tra:")
         print("   1. Database server đã khởi động?")
         print("   2. Cấu hình kết nối trong db.py đã đúng?")

@@ -3,18 +3,10 @@
 import re
 from datetime import datetime
 from typing import Tuple, Optional
-from qr_utils import analyze_cccd, get_new_province_from_old
+from .qr_utils import analyze_cccd, get_new_province_from_old
+from .message_utils import error, warning, success, print_separator
 
 def validate_cccd_format(cccd: str) -> Tuple[bool, str]:
-    """
-    Validate CCCD format (must be exactly 12 digits)
-    
-    Args:
-        cccd: CCCD string to validate
-        
-    Returns:
-        Tuple[bool, str]: (is_valid, error_message)
-    """
     cccd = cccd.strip()
     
     if not cccd:
@@ -29,64 +21,44 @@ def validate_cccd_format(cccd: str) -> Tuple[bool, str]:
     return True, ""
 
 def validate_birth_date_format(ngay_sinh: str) -> Tuple[bool, str, str]:
-    """
-    Validate birth date format and convert to DD/MM/YYYY
-    
-    Supported formats:
-    - DD/MM/YYYY (e.g., 15/07/1986)
-    - DD-MM-YYYY (e.g., 15-07-1986)  
-    - DDMMYYYY (e.g., 15071986)
-    - YYYY (e.g., 1986) - will be converted to 01/01/YYYY
-    
-    Args:
-        ngay_sinh: Birth date string to validate
-        
-    Returns:
-        Tuple[bool, str, str]: (is_valid, error_message, formatted_date_ddmmyyyy)
-    """
     if not ngay_sinh:
         return False, "Ngày sinh không được để trống!", ""
     
     ngay_sinh = ngay_sinh.strip()
     
-    # Format 1: DD/MM/YYYY (already correct)
+    #DD/MM/YYYY 
     if re.match(r'^\d{1,2}/\d{1,2}/\d{4}$', ngay_sinh):
         try:
             parts = ngay_sinh.split('/')
             day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
             
-            # Validate date
             datetime(year, month, day)
             
-            # Format with leading zeros
             formatted = f"{day:02d}/{month:02d}/{year}"
             return True, "", formatted
         except ValueError:
             return False, f"Ngày sinh không hợp lệ: {ngay_sinh}", ""
     
-    # Format 2: DD-MM-YYYY
+    #DD-MM-YYYY
     elif re.match(r'^\d{1,2}-\d{1,2}-\d{4}$', ngay_sinh):
         try:
             parts = ngay_sinh.split('-')
             day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
             
-            # Validate date
             datetime(year, month, day)
             
-            # Format with leading zeros
             formatted = f"{day:02d}/{month:02d}/{year}"
             return True, "", formatted
         except ValueError:
             return False, f"Ngày sinh không hợp lệ: {ngay_sinh}", ""
     
-    # Format 3: DDMMYYYY
+    #DDMMYYYY
     elif re.match(r'^\d{8}$', ngay_sinh):
         try:
             day = int(ngay_sinh[:2])
             month = int(ngay_sinh[2:4])
             year = int(ngay_sinh[4:8])
             
-            # Validate date
             datetime(year, month, day)
             
             formatted = f"{day:02d}/{month:02d}/{year}"
@@ -94,7 +66,7 @@ def validate_birth_date_format(ngay_sinh: str) -> Tuple[bool, str, str]:
         except ValueError:
             return False, f"Ngày sinh không hợp lệ: {ngay_sinh}", ""
     
-    # Format 4: YYYY only
+    #YYYY only
     elif re.match(r'^\d{4}$', ngay_sinh):
         try:
             year = int(ngay_sinh)
@@ -118,47 +90,29 @@ def validate_birth_date_format(ngay_sinh: str) -> Tuple[bool, str, str]:
         ), ""
 
 def display_patient_confirmation_info(ho_ten: str, gioi_tinh: str, ngay_sinh: str, so_cccd: str) -> None:
-    """
-    Display patient information for confirmation (similar to QR code functionality)
-    
-    Args:
-        ho_ten: Patient's full name
-        gioi_tinh: Patient's gender
-        ngay_sinh: Patient's birth date (DD/MM/YYYY format)
-        so_cccd: Patient's CCCD number
-    """
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN VỪA TạO")
-    print("="*60)
+    print_separator(60,"=")
     
-    # Basic information
     print(f"📱 CCCD: {so_cccd}")
     print(f"👤 Họ tên: {ho_ten}")
     print(f"📅 Ngày sinh: {ngay_sinh}")
     print(f"⚤ Giới tính: {gioi_tinh}")
     
-    # Extract year for automatic calculation
     try:
         nam_sinh = int(ngay_sinh.split('/')[-1])
         print(f"🎂 Năm sinh (tự động): {nam_sinh}")
     except:
         pass
     
-    # Generate credentials info
     username = f"{so_cccd}"
     print(f"\n🔑 Thông tin đăng nhập được tạo:")
     print(f"   📧 Username: {username}")
-    print(f"   🔒 Password: Dựa trên CCCD và ngày sinh")
+    print(f"   🔒 Password: Dựa trên CCCD và ngày sinh(4 số cuối CCCD + ngày sinh (01/11/2025 => 011125))")
     
-    print("="*60)
+    print_separator(60,"=")
 
 def input_cccd_with_validation() -> str:
-    """
-    Input CCCD with validation loop until valid format is entered
-    
-    Returns:
-        str: Valid 12-digit CCCD
-    """
     while True:
         cccd = input("Số CCCD (12 chữ số): ").strip()
         is_valid, error_msg = validate_cccd_format(cccd)
@@ -166,16 +120,10 @@ def input_cccd_with_validation() -> str:
         if is_valid:
             return cccd
         else:
-            print(f"❌ {error_msg}")
+            error(error_msg)
             print("Vui lòng nhập lại!")
 
 def input_birth_date_with_validation() -> str:
-    """
-    Input birth date with validation loop until valid format is entered
-    
-    Returns:
-        str: Valid birth date in DD/MM/YYYY format
-    """
     print("\nCác định dạng ngày sinh được hỗ trợ:")
     print("  - DD/MM/YYYY (ví dụ: 15/07/1986)")
     print("  - DD-MM-YYYY (ví dụ: 15-07-1986)")
@@ -189,20 +137,10 @@ def input_birth_date_with_validation() -> str:
         if is_valid:
             return formatted_date
         else:
-            print(f"❌ {error_msg}")
+            error(error_msg)
             print("Vui lòng nhập lại!")
 
 def input_gender_with_recommendation(cccd: str) -> str:
-    """
-    Input gender with CCCD-based recommendation
-    
-    Args:
-        cccd: CCCD number for analysis
-        
-    Returns:
-        str: Valid gender (Nam/Nữ/Khác)
-    """
-    # Analyze CCCD for gender recommendation
     _, gender_cccd, _, _ = analyze_cccd(cccd)
     
     if gender_cccd:
@@ -211,26 +149,15 @@ def input_gender_with_recommendation(cccd: str) -> str:
         if not confirm or confirm in ['y', 'yes']:
             return gender_cccd
     
-    # If no recommendation or user declined, input manually
     while True:
         gioi_tinh = input("Giới tính (Nam/Nữ/Khác): ").strip()
         if gioi_tinh in ['Nam', 'Nữ', 'Khác']:
             return gioi_tinh
         else:
-            print("❌ Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
+            error("Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
             print("Vui lòng nhập lại!")
 
 def input_province_with_recommendation(cccd: str) -> str:
-    """
-    Input province with CCCD-based recommendation
-    
-    Args:
-        cccd: CCCD number for analysis
-        
-    Returns:
-        str: Valid province name
-    """
-    # Analyze CCCD for province recommendation
     province_old, _, _, province_new = analyze_cccd(cccd)
     recommended_province = province_new if province_new else province_old
     
@@ -243,40 +170,27 @@ def input_province_with_recommendation(cccd: str) -> str:
         if not confirm or confirm in ['y', 'yes']:
             return recommended_province
     
-    # If no recommendation or user declined, input manually
     while True:
         tinh = input("Tỉnh/Thành phố: ").strip()
         if tinh:
             return tinh
         else:
-            print("❌ Tỉnh/Thành phố không được để trống!")
+            error("Tỉnh/Thành phố không được để trống!")
             print("Vui lòng nhập lại!")
 
 def input_gender_with_validation() -> str:
-    """
-    Input gender with validation
-    
-    Returns:
-        str: Valid gender (Nam/Nữ/Khác)
-    """
     while True:
         gioi_tinh = input("Giới tính (Nam/Nữ/Khác): ").strip()
         if gioi_tinh in ['Nam', 'Nữ', 'Khác']:
             return gioi_tinh
         else:
-            print("❌ Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
+            error("Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
             print("Vui lòng nhập lại!")
 
 def display_existing_patient_info(patient) -> None:
-    """
-    Display existing patient information in a user-friendly format
-    
-    Args:
-        patient: BenhNhan object from database
-    """
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN ĐÃ TỒN TẠI")
-    print("="*60)
+    print_separator(60,"=")
     
     print(f"📱 CCCD: {patient.so_cccd}")
     print(f"🆔 Mã BN: {patient.ma_bn}")
@@ -286,40 +200,22 @@ def display_existing_patient_info(patient) -> None:
     print(f"🎂 Năm sinh: {patient.nam_sinh}")
 
 def input_full_name_with_validation() -> str:
-    """
-    Input full name with basic validation
-    
-    Returns:
-        str: Valid full name
-    """
     while True:
         ho_ten = input("Họ tên: ").strip()
         if ho_ten:
             return ho_ten
         else:
-            print("❌ Họ tên không được để trống!")
+            error("Họ tên không được để trống!")
             print("Vui lòng nhập lại!")
 
 def input_ward_commune_with_validation() -> str:
-    """
-    Input ward/commune (phường/xã) information
-    
-    Returns:
-        str: Ward/commune information (can be empty)
-    """
     phuong_xa = input("Phường/Xã (có thể để trống): ").strip()
     return phuong_xa
 
 def display_patient_summary(patient) -> None:
-    """
-    Display patient summary for tiep nhan registration
-    
-    Args:
-        patient: BenhNhan object from database
-    """
     print("\n" + "="*50)
     print("         THÔNG TIN BỆNH NHÂN")
-    print("="*50)
+    print_separator(50,"=")
     
     print(f"🆔 Mã BN: {patient.ma_bn}")
     print(f"📋 PID: {patient.pid}")
@@ -327,19 +223,13 @@ def display_patient_summary(patient) -> None:
     print(f"⚤ Giới tính: {patient._gioi_tinh}")
     print(f"🎂 Năm sinh: {patient.nam_sinh}")
     print(f"📱 CCCD: {patient.so_cccd}")
-    print("="*50)
+    print_separator(50,"=")
 
 def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
-    """
-    Display reception registration summary
-    
-    Args:
-        tiep_nhan: TiepNhan object
-        chi_phi: Cost calculation
-    """
+
     print("\n" + "="*60)
     print("           THÔNG TIN ĐĂNG KÝ TIẾP NHẬN")
-    print("="*60)
+    print_separator(60,"=")
     
     print(f"📋 Mã tiếp nhận: {tiep_nhan._ma_tn}")
     print(f"📅 Ngày đăng ký: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
@@ -358,14 +248,14 @@ def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
         print(f"   💊 Tên DV: {tiep_nhan._dv._ten_dv}")
         print(f"   💰 Giá DV: {tiep_nhan._dv._gia:,}đ")
     else:
-        print("   ❌ Chưa có thông tin dịch vụ")
+        error("Chưa có thông tin dịch vụ")
     
     print(f"\n🏥 THÔNG TIN PHÒNG KHÁM:")
     if tiep_nhan._pk:
         print(f"   🚪 Mã phòng: {tiep_nhan._pk._ma_phong}")
         print(f"   🏥 Tên phòng: {tiep_nhan._pk._ten_phong}")
     else:
-        print("   ❌ Chưa có thông tin phòng khám")
+         error("Chưa có thông tin phòng khám")
     
     print(f"\n👨‍⚕️ THÔNG TIN BÁC SĨ:")
     if tiep_nhan._bs:
@@ -373,38 +263,23 @@ def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
         print(f"   👤 Họ tên: {tiep_nhan._bs.ho_ten}")
         print(f"   🩺 Chuyên khoa: {tiep_nhan._bs.chuyen_khoa}")
     else:
-        print("   ❌ Chưa chọn bác sĩ")
+         error("Chưa chọn bác sĩ")
     
     print(f"\n📋 THÔNG TIN KHÁM:")
     print(f"   📝 Lý do khám: {tiep_nhan._ly_do}")
     print(f"   💰 Chi phí tạm tính: {chi_phi:,}đ")
     
-    print("="*60)
+    print_separator(60,"=")
 
 def confirm_with_default_yes(message: str) -> bool:
-    """
-    Confirm with default Yes when Enter is pressed
-    
-    Args:
-        message: Confirmation message
-        
-    Returns:
-        bool: True for yes, False for no
-    """
     response = input(f"{message} (y/n): ").strip().lower()
     return not response or response in ['y', 'yes']
 
 def input_province_with_validation() -> str:
-    """
-    Input province information with validation
-    
-    Returns:
-        str: Valid province name
-    """
     while True:
         tinh = input("Tỉnh/Thành phố: ").strip()
         if tinh:
             return tinh
         else:
-            print("❌ Tỉnh/Thành phố không được để trống!")
+            error("Tỉnh/Thành phố không được để trống!")
             print("Vui lòng nhập lại!")

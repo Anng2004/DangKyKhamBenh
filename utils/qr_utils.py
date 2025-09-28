@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 import re
 from datetime import datetime
+from .message_utils import error, warning, success, info, print_separator
+
 
 # Mã tỉnh thành phố (cũ - trước sắp xếp hành chính)
 PROVINCE_CODES = {
@@ -198,15 +200,14 @@ class QRPatientInfo:
             if year_match:
                 return int(year_match.group())
             
-            print(f"⚠️  Không thể trích xuất năm sinh từ: {ngay_sinh_clean}")
+            warning(f"Không thể trích xuất năm sinh từ: {ngay_sinh_clean}")
             return 0
             
         except (ValueError, IndexError, AttributeError) as e:
-            print(f"⚠️  Lỗi khi trích xuất năm sinh từ '{self.ngay_sinh}': {e}")
+            print(f"Lỗi khi trích xuất năm sinh từ '{self.ngay_sinh}': {e}")
             return 0
     
     def get_formatted_date(self) -> str:
-        """Convert ngay_sinh to formatted date string (DD/MM/YYYY)"""
         try:
             if not self.ngay_sinh:
                 return ""
@@ -236,48 +237,22 @@ class QRPatientInfo:
             if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
                 return f"01/01/{ngay_sinh_clean}"
             
-            # If can't parse, return as is
             return self.ngay_sinh
             
         except (ValueError, IndexError, AttributeError):
             return self.ngay_sinh
 
 def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
-    """
-    Parse QR code string to extract patient information
-    
-    Supports multiple formats:
-    1. New format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi|NgayCap" (NgayCap is ignored)
-    2. Legacy format: "CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi"
-    3. Minimal format: "CCCD||HoTen|||DiaChi" (auto-extract from CCCD)
-    
-    Supported date formats for NgaySinh:
-    - DDMMYYYY (e.g., 15071986)
-    - DD/MM/YYYY (e.g., 15/07/1986)
-    - DD-MM-YYYY (e.g., 15-07-1986)
-    - YYYY (e.g., 1986)
-    
-    Birth year (nam_sinh) is automatically extracted from NgaySinh regardless of format.
-    
-    Examples:
-    - "058186000028|2345678|Nguyễn Thị Test|15071986|Nữ|Ninh Thuận|15062020" (new format)
-    - "058186000028|2345678|Nguyễn Thị Test|15/07/1986|Nữ|Ninh Thuận" (with DD/MM/YYYY)
-    - "058186000028||Nguyễn Thị Test|||Ninh Thuận" (minimal format)
-    """
     try:
-        # Split the QR string by pipe character
         parts = qr_string.strip().split('|')
         
         if len(parts) < 3:
-            print(f"❌ QR code không đúng định dạng. Cần ít nhất CCCD|CMND|HoTen")
+            error(f"QR code không đúng định dạng. Cần ít nhất CCCD|CMND|HoTen")
             return None
-        
-        # Handle both new format (7 parts) and legacy format (6 parts)
-        # Pad parts to at least 6 elements if needed
+    
         while len(parts) < 6:
             parts.append('')
         
-        # Extract the core 6 parts (ignore NgayCap if present)
         cccd = parts[0].strip()
         cmnd = parts[1].strip()
         ho_ten = parts[2].strip()
@@ -285,47 +260,39 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
         gioi_tinh = parts[4].strip()
         dia_chi = parts[5].strip()
         
-        # Ignore NgayCap (parts[6]) if present
         if len(parts) > 6:
             ngay_cap = parts[6].strip()
-            print(f"ℹ️  Đã bỏ qua Ngày cấp: {ngay_cap}")
+            info(f"Đã bỏ qua Ngày cấp: {ngay_cap}")
         
-        # Validate CCCD (should be 12 digits)
         if not re.match(r'^\d{12}$', cccd):
-            print(f"❌ CCCD không hợp lệ: {cccd} (phải là 12 chữ số)")
+            error(f"CCCD không hợp lệ: {cccd} (phải là 12 chữ số)")
             return None
         
         if not ho_ten:
-            print("❌ Họ tên không được để trống")
+            error("Họ tên không được để trống")
             return None
         
-        # Auto-extract information from CCCD if missing
         extracted_province_old, extracted_gender, extracted_year, extracted_province_new = analyze_cccd(cccd)
         
-        # Use extracted gender if not provided in QR
         if not gioi_tinh and extracted_gender:
             gioi_tinh = extracted_gender
-            print(f"✅ Phân tích CCCD: Giới tính = {gioi_tinh}")
+            success(f"Phân tích CCCD: Giới tính = {gioi_tinh}")
         
-        # Use extracted year if birth date not provided
         if not ngay_sinh and extracted_year:
             ngay_sinh = str(extracted_year)
-            print(f"✅ Phân tích CCCD: Năm sinh = {extracted_year}")
+            success(f"Phân tích CCCD: Năm sinh = {extracted_year}")
         
-        # Use extracted province for address if address is empty
         if not dia_chi and extracted_province_new:
             dia_chi = extracted_province_new
-            print(f"✅ Phân tích CCCD: Tỉnh/TP = {extracted_province_new} (mới)")
+            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_province_new} (mới)")
         elif not dia_chi and extracted_province_old:
             dia_chi = extracted_province_old
-            print(f"✅ Phân tích CCCD: Tỉnh/TP = {extracted_province_old} (cũ)")
+            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_province_old} (cũ)")
         
-        # Validate final data
         if gioi_tinh and gioi_tinh not in ['Nam', 'Nữ']:
-            print(f"❌ Giới tính không hợp lệ: {gioi_tinh} (phải là 'Nam' hoặc 'Nữ')")
+            error(f"Giới tính không hợp lệ: {gioi_tinh} (phải là 'Nam' hoặc 'Nữ')")
             return None
         
-        # Validate birth date if provided (support multiple formats)
         if ngay_sinh:
             valid_formats = [
                 r'^\d{8}$',          # DDMMYYYY
@@ -334,7 +301,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
                 r'^\d{2}-\d{2}-\d{4}$'   # DD-MM-YYYY
             ]
             if not any(re.match(pattern, ngay_sinh) for pattern in valid_formats):
-                print(f"❌ Ngày sinh không hợp lệ: {ngay_sinh} (phải là DDMMYYYY, DD/MM/YYYY, DD-MM-YYYY hoặc YYYY)")
+                error(f"Ngày sinh không hợp lệ: {ngay_sinh} (phải là DDMMYYYY, DD/MM/YYYY, DD-MM-YYYY hoặc YYYY)")
                 return None
         
         return QRPatientInfo(
@@ -347,16 +314,14 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
         )
         
     except Exception as e:
-        print(f"❌ Lỗi khi phân tích QR code: {e}")
+        error(f"Lỗi khi phân tích QR code: {e}")
         return None
 
 def display_patient_info(qr_info: QRPatientInfo) -> None:
-    """Display patient information for confirmation"""
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN TỪ QR CODE")
-    print("="*60)
+    print_separator(60,"=")
     
-    # Hiển thị thông tin cơ bản
     print(f"📱 CCCD: {qr_info.cccd}")
     if qr_info.cmnd:
         print(f"📇 CMND: {qr_info.cmnd}")
@@ -396,14 +361,10 @@ def display_patient_info(qr_info: QRPatientInfo) -> None:
     if birth_year:
         print(f"   🎂 Năm sinh (theo CCCD): {birth_year}")
     
-    print("="*60)
+    print_separator(60,"=")
 
 def generate_username_from_qr(qr_info: QRPatientInfo) -> str:
-    """Generate username from QR patient info"""
-    # Use last 6 digits of CCCD as username
     return f"BN{qr_info.cccd[-6:]}"
 
 def generate_password_from_qr(qr_info: QRPatientInfo) -> str:
-    """Generate password from QR patient info"""
-    # Use birth date as password for simplicity
     return qr_info.ngay_sinh

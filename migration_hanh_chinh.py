@@ -7,6 +7,7 @@ Công cụ migration sắp xếp đơn vị hành chính
 import json
 from db import get_conn
 from datetime import datetime
+from utils.message_utils import error, success, warning, info, print_separator
 
 # Dữ liệu sắp xếp hành chính theo NQ 202/2025/QH15
 ADMIN_REORGANIZATION = {
@@ -43,25 +44,13 @@ ADMIN_REORGANIZATION = {
 }
 
 def get_new_province_from_old(old_province: str) -> str:
-    """
-    Mapping tỉnh cũ sang tỉnh mới
-    
-    Args:
-        old_province: Tên tỉnh cũ
-        
-    Returns:
-        Tên tỉnh mới sau sắp xếp
-    """
-    # Kiểm tra tỉnh không đổi
     if old_province in ADMIN_REORGANIZATION['unchanged']:
         return old_province
     
-    # Kiểm tra tỉnh sáp nhập
     for merged in ADMIN_REORGANIZATION['merged']:
         if old_province in merged['includes']:
             return merged['new']
     
-    # Xử lý các trường hợp đặc biệt
     name_mappings = {
         'Hà Nội': 'Thành phố Hà Nội',
         'TP.Hồ Chí Minh': 'Thành phố Hồ Chí Minh',
@@ -74,7 +63,6 @@ def get_new_province_from_old(old_province: str) -> str:
     if old_province in name_mappings:
         return name_mappings[old_province]
     
-    # Tìm trong danh sách sáp nhập
     for merged in ADMIN_REORGANIZATION['merged']:
         for include in merged['includes']:
             if (old_province == include or 
@@ -82,16 +70,14 @@ def get_new_province_from_old(old_province: str) -> str:
                 old_province == include.replace('TP.', '')):
                 return merged['new']
     
-    return old_province  # Trả về tên cũ nếu không tìm thấy
+    return old_province
 
 def migrate_patient_provinces():
-    """Migration thông tin tỉnh của bệnh nhân - cập nhật trực tiếp cột Tinh"""
     conn = get_conn()
     cur = conn.cursor()
     
     print("🔄 Bắt đầu migration thông tin tỉnh bệnh nhân...")
     
-    # Lấy tất cả bệnh nhân có thông tin tỉnh
     cur.execute("SELECT BN_ID, Tinh FROM BenhNhan WHERE Tinh IS NOT NULL AND Tinh != ''")
     patients = cur.fetchall()
     
@@ -106,10 +92,8 @@ def migrate_patient_provinces():
             bn_id = patient.BN_ID
             old_province = patient.Tinh.strip()
             
-            # Mapping sang tỉnh mới
             new_province = get_new_province_from_old(old_province)
             
-            # Chỉ cập nhật nếu tên tỉnh thay đổi
             if new_province != old_province:
                 cur.execute("""
                 UPDATE BenhNhan 
@@ -119,35 +103,59 @@ def migrate_patient_provinces():
                 migrated_count += 1
                 
                 if migrated_count % 50 == 0:
-                    print(f"  ✅ Đã migration {migrated_count} bệnh nhân...")
+                    success(f"  Đã migration {migrated_count} bệnh nhân...")
             else:
                 unchanged_count += 1
                 
         except Exception as e:
             error_count += 1
-            print(f"  ❌ Lỗi migration bệnh nhân {bn_id}: {e}")
+            error(f"  Lỗi migration bệnh nhân {bn_id}: {e}")
     
     conn.commit()
     conn.close()
     
-    print(f"✅ Hoàn thành migration:")
+    success(f"Hoàn thành migration:")
     print(f"   - Đã cập nhật: {migrated_count} bệnh nhân")
     print(f"   - Không thay đổi: {unchanged_count} bệnh nhân") 
     print(f"   - Lỗi: {error_count} bệnh nhân")
 
 def run_full_migration():
-    print("=" * 70)
+    print_separator(70,"=")
     try:
 
-        # 3. Migration bệnh nhân
         migrate_patient_provinces()
         print()
         
     except Exception as e:
-        print(f"❌ Lỗi migration: {e}")
+        error(f"Lỗi migration: {e}")
         return False
     
     return True
+
+def check_migration_status():
+    conn = get_conn()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+        SELECT 
+            COUNT(*) as total,
+            SUM(CASE WHEN Tinh IS NOT NULL AND Tinh != '' THEN 1 ELSE 0 END) as has_province
+        FROM BenhNhan
+        """)
+        
+        stats = cur.fetchone()
+        total = stats.total
+        has_province = stats.has_province
+        
+        print(f"\nThống kê bệnh nhân:")
+        info("   - Tổng số: {total}")
+        info("   - Có thông tin tỉnh: {has_province}")
+        
+    except Exception as e:
+        error(f"Lỗi: {e}")
+    finally:
+        conn.close()
 
 if __name__ == "__main__":
     run_full_migration()

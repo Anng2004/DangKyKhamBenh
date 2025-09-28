@@ -419,7 +419,8 @@ class TiepNhanRepo:
                    bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
                    dv.dv_id, dv.MaDichVu, dv.TenDichVu, dv.GiaDichVu,
                    pk.PK_ID, pk.MaPhong, pk.TenPhong,
-                   bs.BS_ID, bs.MaBacSi, bs.HoTen as BSHoTen, bs.ChuyenKhoa
+                   bs.BS_ID, bs.MaBacSi, bs.HoTen as BSHoTen, bs.ChuyenKhoa,
+                   tn.created_at
             FROM TiepNhan tn
             JOIN BenhNhan bn ON bn.BN_ID = tn.BN_ID
             LEFT JOIN DM_DichVuKyThuat dv ON dv.dv_id = tn.Dv_ID
@@ -437,7 +438,7 @@ class TiepNhanRepo:
             dv = DichVu(str(r.dv_id), r.MaDichVu, r.TenDichVu, r.GiaDichVu) if r.dv_id else None
             pk = PhongKham(str(r.PK_ID), r.MaPhong, r.TenPhong) if r.PK_ID else None
             bs = BacSi(str(r.BS_ID), r.MaBacSi, r.BSHoTen, r.ChuyenKhoa or "", "", "") if r.BS_ID else None
-            result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs))
+            result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs, str(r.created_at) if r.created_at else ""))
         return result
 
     def list_by_user(self, username: str) -> List[TiepNhan]:
@@ -468,7 +469,7 @@ class TiepNhanRepo:
             dv = DichVu(str(r.dv_id), r.MaDichVu, r.TenDichVu, r.GiaDichVu) if r.dv_id else None
             pk = PhongKham(str(r.PK_ID), r.MaPhong, r.TenPhong) if r.PK_ID else None
             bs = BacSi(str(r.BS_ID), r.MaBacSi, r.BSHoTen, r.ChuyenKhoa or "", "", "") if r.BS_ID else None
-            result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs))
+            result.append(TiepNhan(str(r.TiepNhan_ID), r.MaTiepNhan, bn, r.LyDoKham, dv, pk, bs, str(r.created_at) if r.created_at else ""))
         return result
 
     def get_by_ma(self, ma_tn: str) -> Optional[TiepNhan]:

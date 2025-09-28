@@ -10,8 +10,8 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 clear
-echo -e "${GREEN}🏥 HỆ THỐNG QUẢN LÝ KHÁM BỆNH - NÂNG CAP${NC}"
-echo -e "${CYAN}📊 Với tính năng Báo cáo & Xuất Excel chuyên nghiệp${NC}"
+echo -e "${GREEN}🏥 HỆ THỐNG QUẢN LÝ KHÁM BỆNH${NC}"
+echo -e "${CYAN}📊 Báo cáo Excel + 🔍 Lịch sử khám nâng cao${NC}"
 echo "================================================"
 echo ""
 
