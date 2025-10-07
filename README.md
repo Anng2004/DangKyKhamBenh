@@ -100,9 +100,9 @@ Chỉnh sửa file `db.py`:- 🎨 **Excel styling chuyên nghiệp** với openp
 
 conn_str = (- 💾 **CSV fallback** khi không có pandas
 
-    "DRIVER={ODBC Driver 17 for SQL Server};"- 🗂️ **Cấu trúc thư mục** có tổ chức (reports/benh_nhan/, tiep_nhan/, etc.)
+    "DRIVER={ODBC Driver 13 for SQL Server};"- 🗂️ **Cấu trúc thư mục** có tổ chức (reports/benh_nhan/, tiep_nhan/, etc.)
 
-    "SERVER=localhost\\SQLEXPRESS;"    # Thay đổi server
+    "SERVER=HOME\\GIOAN\\SQLEXPRESS;"    # Thay đổi server
 
     "DATABASE=DangKyKhamBenh;"### 🧠 QR Code Analysis:
 
@@ -184,9 +184,9 @@ Chỉnh sửa file `db.py` để cấu hình kết nối SQL Server:
 
 - Thống kê: Tổng lần khám, tổng chi phíconn_str = (
 
-- Xem chi tiết: Nhập STT để xem thông tin đầy đủ    "DRIVER={ODBC Driver 17 for SQL Server};"
+- Xem chi tiết: Nhập STT để xem thông tin đầy đủ    "DRIVER={ODBC Driver 13 for SQL Server};"
 
-    "SERVER=localhost\\SQLEXPRESS;"    # Thay đổi server tại đây
+    "SERVER=HOME\\GIOAN\\SQLEXPRESS;"    # Thay đổi server tại đây
 
 **🔍 Lịch sử chi tiết (Option 5):**    "DATABASE=DangKyKhamBenh;"
 
@@ -342,7 +342,7 @@ pip install -r requirements.txt
 
 # Kiểm tra SQL Server chạy: services.msc → SQL Serverpython3 -c "import openpyxl; print('✅ openpyxl OK')" 2>/dev/null || echo "⚠️  openpyxl missing"
 
-# Test connection: sqlcmd -S localhost\SQLEXPRESS```
+# Test connection: sqlcmd -S HOME\\GIOAN\SQLEXPRESS```
 
 # Xác nhận connection string trong db.py
 
@@ -354,7 +354,7 @@ pip install -r requirements.txt
 
 ```bash**Linux**: 
 
-# Install ODBC Driver 17 for SQL Server```bash
+# Install ODBC Driver 13 for SQL Server```bash
 
 # Windows: Download từ Microsoft# Ubuntu/Debian
 
@@ -571,13 +571,13 @@ cli_khambenh/
 # Solutions:
 1. Kiểm tra SQL Server đã chạy: services.msc → SQL Server
 2. Xác nhận connection string trong db.py  
-3. Test connection: sqlcmd -S localhost\SQLEXPRESS
+3. Test connection: sqlcmd -S HOME\\GIOAN\SQLEXPRESS
 4. Firewall: Allow SQL Server port 1433
 ```
 
 ### ❌ ODBC Driver Issues:
 ```bash
-# Error: "Can't open lib 'ODBC Driver 17 for SQL Server'"
+# Error: "Can't open lib 'ODBC Driver 13 for SQL Server'"
 # Solutions:
 1. Install ODBC Driver 17 (hướng dẫn trên)
 2. macOS: brew install unixodbc

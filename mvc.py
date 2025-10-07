@@ -22,23 +22,23 @@ class Model:
         self.tn_repo = TiepNhanRepo()
         self.bs_repo = BacSiRepo()
 
-    # Proxy to repos
-    def list_benh_nhan(self) -> List[BenhNhan]:
+    # Thông tin danh sách bệnh nhân, phòng khám, dịch vụ, tiếp nhận, bác sĩ
+    def ds_benh_nhan(self) -> List[BenhNhan]:
         return self.bn_repo.list_all()
 
-    def list_phong_kham(self) -> List[PhongKham]:
+    def ds_phong_kham(self) -> List[PhongKham]:
         return self.pk_repo.list_all()
 
-    def list_dich_vu(self) -> List[DichVu]:
+    def ds_dich_vu(self) -> List[DichVu]:
         return self.dv_repo.list_all()
 
-    def list_tiep_nhan(self) -> List[TiepNhan]:
+    def ds_tiep_nhan(self) -> List[TiepNhan]:
         return self.tn_repo.list_all()
 
-    def list_tiep_nhan_by_user(self, username: str) -> List[TiepNhan]:
+    def ds_tiep_nhan_theo_user(self, username: str) -> List[TiepNhan]:
         return self.tn_repo.list_by_user(username)
 
-    def list_bac_si(self) -> List[BacSi]:
+    def ds_bac_si(self) -> List[BacSi]:
         return self.bs_repo.list_all()
 
 
@@ -54,9 +54,9 @@ class Controller:
         ngay_sinh_ddmmyyyy: str, 
         so_cccd: str
     ) -> None:
-        from utils.qr_utils import analyze_cccd, get_new_province_from_old
+        from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gender_cccd, birth_year_cccd, province_new = analyze_cccd(so_cccd)
+        province_old, gender_cccd, birth_year_cccd, province_new = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
@@ -82,7 +82,7 @@ class Controller:
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
         
-    def them_benh_nhan_full(
+    def them_benh_nhan_daydu(
         self,
         ho_ten: str,
         gioi_tinh: str,
@@ -91,9 +91,9 @@ class Controller:
         phuong_xa: str = "",
         tinh: str = ""
     ) -> None:
-        from utils.qr_utils import analyze_cccd, get_new_province_from_old
+        from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gender_cccd, birth_year_cccd, province_new = analyze_cccd(so_cccd)
+        province_old, gender_cccd, birth_year_cccd, province_new = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
@@ -120,7 +120,7 @@ class Controller:
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
 
     def tiep_nhan(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> None:
-        tiep_nhan, chi_phi = self.tiep_nhan_enhanced(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+        tiep_nhan, chi_phi = self.them_tiep_nhan(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
         
         if tiep_nhan and chi_phi is not None:
             bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
@@ -146,7 +146,7 @@ class Controller:
         self.view.print_message("="*60)
 
     def tiep_nhan_cho_user(self, username: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> None:
-        tiep_nhan, chi_phi = self.tiep_nhan_enhanced(username, ma_dv, ma_pk, ly_do, ma_bs)
+        tiep_nhan, chi_phi = self.them_tiep_nhan(username, ma_dv, ma_pk, ly_do, ma_bs)
         
         if tiep_nhan and chi_phi is not None:
             bs_info = f" - Bác sĩ: {ma_bs}" if ma_bs else ""
@@ -154,7 +154,7 @@ class Controller:
             
             self.in_thong_tin_tiep_nhan(tiep_nhan, chi_phi)
 
-    def tiep_nhan_enhanced(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> tuple:
+    def them_tiep_nhan(self, so_cccd: str, ma_dv: str, ma_pk: str, ly_do: str, ma_bs: str = "") -> tuple:
         bn = self.model.bn_repo.get_by_cccd(so_cccd)
         if not bn:
             self.view.print_message("Không tìm thấy bệnh nhân với CCCD đã nhập.")
@@ -183,16 +183,16 @@ class Controller:
         return tiep_nhan, chi_phi
 
     def hien_thi_ds_benh_nhan(self):
-        self.view.print_list(self.model.list_benh_nhan())
+        self.view.print_list(self.model.ds_benh_nhan())
 
     def hien_thi_ds_phong_kham(self):
-        self.view.print_list(self.model.list_phong_kham())
+        self.view.print_list(self.model.ds_phong_kham())
 
     def hien_thi_ds_dich_vu(self):
-        self.view.print_list(self.model.list_dich_vu())
+        self.view.print_list(self.model.ds_dich_vu())
     
     def hien_thi_danh_sach_dich_vu_cho_user(self):
-        dich_vu_list = self.model.list_dich_vu()
+        dich_vu_list = self.model.ds_dich_vu()
         if not dich_vu_list:
             self.view.print_message("📋 Không có dịch vụ nào!")
             return
@@ -208,7 +208,7 @@ class Controller:
         self.view.print_message("="*60)
 
     def hien_thi_danh_sach_phong_kham_cho_user(self):
-        phong_kham_list = self.model.list_phong_kham()
+        phong_kham_list = self.model.ds_phong_kham()
         if not phong_kham_list:
             self.view.print_message("📋 Không có phòng khám nào!")
             return
@@ -227,7 +227,7 @@ class Controller:
         self.view.print_message("="*80)
 
     def hien_thi_danh_sach_bac_si_cho_user(self):
-        bac_si_list = self.model.list_bac_si()
+        bac_si_list = self.model.ds_bac_si()
         if not bac_si_list:
             self.view.print_message("📋 Không có bác sĩ nào!")
             return
@@ -243,15 +243,14 @@ class Controller:
         self.view.print_message("="*70)
 
     def hien_thi_ds_tiep_nhan(self):
-        self.view.print_list(self.model.list_tiep_nhan())
+        self.view.print_list(self.model.ds_tiep_nhan())
     
     def hien_thi_lich_su_kham_cua_user(self, username: str):
-        lich_su = self.model.list_tiep_nhan_by_user(username)
+        lich_su = self.model.ds_tiep_nhan_theo_user(username)
         if not lich_su:
             self.view.print_message(f"📋 Không tìm thấy lịch sử khám cho tài khoản: {username}")
             return
         
-        # Get patient info for header
         benh_nhan_info = None
         if lich_su:
             benh_nhan_info = lich_su[0]._bn
@@ -265,29 +264,27 @@ class Controller:
         self.view.print_message("-"*125)
         
         for i, tn in enumerate(lich_su, 1):
-            # Extract details
             dv_info = f"{tn._dv.ten_dv}" if tn._dv else "Chưa có"
-            # Truncate service name if too long
+            # cộng chuỗi thông tin dịch vụ nếu quá dài
             if len(dv_info) > 28:
                 dv_info = dv_info[:25] + "..."
             
             pk_info = f"{tn._pk.ten_phong}" if tn._pk else "Chưa có"
-            # Truncate clinic name if too long
+            # cộng chuỗi thông tin phòng khám nếu quá dài
             if len(pk_info) > 18:
                 pk_info = pk_info[:15] + "..."
                 
             bs_info = f"{tn._bs.ho_ten}" if tn._bs else "Chưa có"
-            # Truncate doctor name if too long
+            # cộng chuỗi thông tin bác sĩ nếu quá dài
             if len(bs_info) > 40:
                 bs_info = bs_info[:40] + "..."
                 
             chi_phi = f"{tn._dv.gia:,}đ" if tn._dv else "0đ"
             
-            # Format date from created_at
+
             ngay_kham = "Chưa rõ"
             if hasattr(tn, '_created_at') and tn._created_at:
                 try:
-                    # Try to extract date part from datetime string
                     ngay_kham = tn._created_at[:10] if len(tn._created_at) >= 10 else tn._created_at
                 except:
                     ngay_kham = "Chưa rõ"
@@ -297,11 +294,11 @@ class Controller:
         self.view.print_message("="*125)
         self.view.print_message(f"📊 Tổng số lần khám: {len(lich_su)}")
         
-        # Calculate total cost
+        # Tính chi phí khám
         total_cost = sum(tn._dv.gia for tn in lich_su if tn._dv)
         self.view.print_message(f"💰 Tổng chi phí đã khám: {total_cost:,}đ")
         
-        # Option to view details of a specific record
+        # Chọn STT xem chi tiết
         if lich_su:
             self.view.print_message("\n🔍 Nhập số STT để xem chi tiết (hoặc Enter để quay lại):")
             try:
@@ -321,33 +318,33 @@ class Controller:
         self.view.print_message("="*60)
         self.view.print_message(f"📋 Mã tiếp nhận: {tn._ma_tn}")
         
-        # Patient info
+        # Thông tin bệnh nhân
         self.view.print_message(f"👤 Bệnh nhân: {tn._bn._ho_ten}")
         self.view.print_message(f"   - Giới tính: {tn._bn._gioi_tinh}")
         self.view.print_message(f"   - Năm sinh: {tn._bn._nam_sinh}")
         self.view.print_message(f"   - CCCD: {tn._bn.so_cccd}")
         
-        # Service info
+        # thông tin dich vụ đăng ký
         if tn._dv:
             self.view.print_message(f"🩺 Dịch vụ: {tn._dv.ten_dv}")
             self.view.print_message(f"   - Mã dịch vụ: {tn._dv.ma_dv}")
             self.view.print_message(f"   - Giá: {tn._dv.gia:,}đ")
         
-        # Clinic info
+        # thông tin phòng khám đăng ký
         if tn._pk:
             self.view.print_message(f"🏥 Phòng khám: {tn._pk.ten_phong}")
             self.view.print_message(f"   - Mã phòng: {tn._pk.ma_phong}")
         
-        # Doctor info
+        # thông tin bác sĩ
         if tn._bs:
             self.view.print_message(f"👨‍⚕️ Bác sĩ: {tn._bs.ho_ten}")
             self.view.print_message(f"   - Mã bác sĩ: {tn._bs.ma_bs}")
             self.view.print_message(f"   - Chuyên khoa: {tn._bs.chuyen_khoa}")
         
-        # Visit info
+        # lý do khám
         self.view.print_message(f"📝 Lý do khám: {tn._ly_do}")
         
-        # Date info
+        # ngày khám
         if hasattr(tn, '_created_at') and tn._created_at:
             self.view.print_message(f"📅 Ngày khám: {tn._created_at}")
         
@@ -355,12 +352,11 @@ class Controller:
         input("\n📥 Nhấn Enter để tiếp tục...")
         
     def hien_thi_lich_su_kham_cua_user_chi_tiet(self, username: str):
-        lich_su = self.model.list_tiep_nhan_by_user(username)
+        lich_su = self.model.ds_tiep_nhan_theo_user(username)
         if not lich_su:
             self.view.print_message(f"📋 Không tìm thấy lịch sử khám cho tài khoản: {username}")
             return
             
-        # Get patient info
         benh_nhan_info = lich_su[0]._bn if lich_su else None
         
         while True:
@@ -397,10 +393,10 @@ class Controller:
                 self.view.print_message("❌ Vui lòng nhập số hợp lệ!")
 
     def hien_thi_ds_bac_si(self):
-        self.view.print_list(self.model.list_bac_si())
+        self.view.print_list(self.model.ds_bac_si())
 
     def hien_thi_danh_sach_benh_nhan_cho_admin(self):
-        benh_nhan_list = self.model.list_benh_nhan()
+        benh_nhan_list = self.model.ds_benh_nhan()
         if not benh_nhan_list:
             self.view.print_message("📋 Không có bệnh nhân nào!")
             return
@@ -417,7 +413,7 @@ class Controller:
         self.view.print_message(f"📊 Tổng cộng: {len(benh_nhan_list)} bệnh nhân")
 
     def hien_thi_danh_sach_tiep_nhan_cho_admin(self):
-        tiep_nhan_list = self.model.list_tiep_nhan()
+        tiep_nhan_list = self.model.ds_tiep_nhan()
         if not tiep_nhan_list:
             self.view.print_message("📋 Không có tiếp nhận nào!")
             return
@@ -479,7 +475,7 @@ class Controller:
         
         display_patient_info(qr_info)
         
-        # Check if patient already exists
+        # kiểm tra bệnh nhân đã tồn tại
         existing_patient = self.model.bn_repo.get_by_cccd(qr_info.cccd)
         if existing_patient:
             print(f"\n⚠️  Bệnh nhân đã tồn tại trong hệ thống:")
@@ -491,7 +487,7 @@ class Controller:
             else:
                 return None
         
-        # Confirm creation
+        # xác nhận tạo bệnh nhân mới
         print(f"\n📝 Thông tin tài khoản sẽ được tạo:")
         print(f"   👤 Username: {qr_info.cccd}")
         print(f"   🔒 Password: {qr_info.ngay_sinh}")
@@ -501,9 +497,9 @@ class Controller:
             self.view.print_message("❌ Đã hủy tạo bệnh nhân.")
             return None
         
-        # Create patient from QR
+        # tạo bệnh nhân mới từ chuỗi QR
         try:
-            formatted_date = qr_info.get_formatted_date()  # Convert to dd/mm/yyyy
+            formatted_date = qr_info.get_formatted_date()  # Convert sang dd/mm/yyyy
             bn_id = self.model.bn_repo.create_from_qr(
                 ho_ten=qr_info.ho_ten,
                 gioi_tinh=qr_info.gioi_tinh,
@@ -519,7 +515,7 @@ class Controller:
                 self.view.print_message(f"   👤 Username: {qr_info.cccd}")
                 self.view.print_message(f"   🔒 Password: {qr_info.ngay_sinh}")
                 
-                # Return the newly created patient
+                # trả thông tin bệnh nhân mới tạo
                 return self.model.bn_repo.get_by_cccd(qr_info.cccd)
             else:
                 self.view.print_message("❌ Có lỗi khi tạo bệnh nhân!")

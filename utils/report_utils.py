@@ -182,12 +182,12 @@ class ReportManager:
             
             # Thống kê cơ bản
             stats['benh_nhan'] = {
-                'tong_so': len(model.list_benh_nhan()),
+                'tong_so': len(model.ds_benh_nhan()),
                 'nam': 0,
                 'nu': 0
             }
             
-            for bn in model.list_benh_nhan():
+            for bn in model.ds_benh_nhan():
                 if hasattr(bn, '_gioi_tinh'):
                     if bn._gioi_tinh.lower() in ['nam', 'male', 'm']:
                         stats['benh_nhan']['nam'] += 1
@@ -195,7 +195,7 @@ class ReportManager:
                         stats['benh_nhan']['nu'] += 1
             
             stats['tiep_nhan'] = {
-                'tong_so': len(model.list_tiep_nhan()),
+                'tong_so': len(model.ds_tiep_nhan()),
                 'hom_nay': 0,
                 'tuan_nay': 0,
                 'thang_nay': 0
@@ -206,7 +206,7 @@ class ReportManager:
             week_start = today - timedelta(days=today.weekday())
             month_start = today.replace(day=1)
             
-            for tn in model.list_tiep_nhan():
+            for tn in model.ds_tiep_nhan():
                 # Giả sử có thuộc tính ngay_tao
                 if hasattr(tn, 'ngay_tao') and tn.ngay_tao:
                     tn_date = tn.ngay_tao.date() if hasattr(tn.ngay_tao, 'date') else tn.ngay_tao
@@ -218,12 +218,12 @@ class ReportManager:
                         stats['tiep_nhan']['thang_nay'] += 1
             
             stats['dich_vu'] = {
-                'tong_so': len(model.list_dich_vu()),
+                'tong_so': len(model.ds_dich_vu()),
                 'gia_cao_nhat': 0,
                 'gia_thap_nhat': float('inf')
             }
             
-            for dv in model.list_dich_vu():
+            for dv in model.ds_dich_vu():
                 if hasattr(dv, '_gia') and isinstance(dv._gia, (int, float)):
                     if dv._gia > stats['dich_vu']['gia_cao_nhat']:
                         stats['dich_vu']['gia_cao_nhat'] = dv._gia
@@ -234,11 +234,11 @@ class ReportManager:
                 stats['dich_vu']['gia_thap_nhat'] = 0
                 
             stats['phong_kham'] = {
-                'tong_so': len(model.list_phong_kham())
+                'tong_so': len(model.ds_phong_kham())
             }
             
             stats['bac_si'] = {
-                'tong_so': len(model.list_bac_si()) if hasattr(model, 'list_bac_si') and callable(model.list_bac_si) else 0
+                'tong_so': len(model.ds_bac_si()) if hasattr(model, 'ds_bac_si') and callable(model.ds_bac_si) else 0
             }
             
             return stats
@@ -271,7 +271,7 @@ class ReportManager:
             data_dict['Thống kê tổng quan'] = overview_data
             
             benh_nhan_data = []
-            for i, bn in enumerate(model.list_benh_nhan(), 1):
+            for i, bn in enumerate(model.ds_benh_nhan(), 1):
                 benh_nhan_data.append({
                     'STT': i,
                     'Mã BN': getattr(bn, 'ma_bn', ''),
@@ -285,7 +285,7 @@ class ReportManager:
                 data_dict['Chi tiết bệnh nhân'] = benh_nhan_data
             
             tiep_nhan_data = []
-            for i, tn in enumerate(model.list_tiep_nhan(), 1):
+            for i, tn in enumerate(model.ds_tiep_nhan(), 1):
                 tiep_nhan_data.append({
                     'STT': i,
                     'Mã TN': getattr(tn, '_ma_tn', ''),
@@ -318,7 +318,7 @@ class ReportManager:
 
     def export_revenue_report(self, model, author: str = "System") -> str:
         try:
-            tiep_nhan_list = model.list_tiep_nhan()
+            tiep_nhan_list = model.ds_tiep_nhan()
             
             revenue_data = []
             total_revenue = 0

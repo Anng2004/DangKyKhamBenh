@@ -14,7 +14,7 @@ class AbsEntity(ABC):
         print(str(self))
 
 
-# ===== Domain models =====
+# ===== Nghiệp vụ =====
 class User(AbsEntity):
     def __init__(self, user_id: str, username: str, role: str):
         self._user_id = user_id
@@ -129,35 +129,36 @@ class BenhNhan(AbsEntity):
     def gioi_tinh(self) -> str: return self._gioi_tinh
     
     @staticmethod
-    def extract_nam_sinh_from_date(ngay_sinh_str: str) -> int:
-        """Extract birth year from various date formats"""
+    def lay_nam_sinh(ngay_sinh_str: str) -> int:
+        """lấy năm sinh từ chuỗi ngày sinh với các định dạng khác nhau.
+        Hỗ trợ các định dạng:"""
         try:
             if not ngay_sinh_str:
                 return 0
             
             ngay_sinh_clean = ngay_sinh_str.strip()
             
-            # Format 1: DDMMYYYY (8 digits)
+            # Format 1: DDMMYYYY (8 ký tự, không dấu phân cách)
             if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 8:
                 return int(ngay_sinh_clean[4:8])
             
-            # Format 2: DD/MM/YYYY
+            # Format 2: DD/MM/YYYY (dấu phân cách '/')
             if '/' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
                 parts = ngay_sinh_clean.split('/')
                 if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
                     return int(parts[2])
             
-            # Format 3: DD-MM-YYYY
+            # Format 3: DD-MM-YYYY (dấu phân cách '-')
             if '-' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
                 parts = ngay_sinh_clean.split('-')
                 if len(parts) == 3 and parts[2].isdigit() and len(parts[2]) == 4:
                     return int(parts[2])
             
-            # Format 4: YYYY only (4 digits)
+            # Format 4: YYYY only (4 ký tự)
             if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
                 return int(ngay_sinh_clean)
             
-            # Try to extract 4-digit year from any position in the string
+            # Tìm 4 ký tự liên tiếp bắt đầu bằng 19xx hoặc 20xx trong chuỗi
             import re
             year_match = re.search(r'\b(19|20)\d{2}\b', ngay_sinh_clean)
             if year_match:

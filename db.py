@@ -2,20 +2,20 @@ import pyodbc
 from utils.message_utils import error, success, info, print_separator
 
 CONN_STR = (
-    "Driver={ODBC Driver 17 for SQL Server};"
-    "Server=localhost;"                   
+    "Driver={ODBC Driver 13 for SQL Server};"
+    "Server=HOME\\GIOAN;"                   
     "Database=DangKyKhamBenh;"           
     "UID=SA;"                            
-    "PWD=Admin@123;"                     
+    "PWD=123456;"                     
     "TrustServerCertificate=yes;"
 )
 
 MASTER_CONN_STR = (
-    "Driver={ODBC Driver 17 for SQL Server};"
-    "Server=localhost;" 
+    "Driver={ODBC Driver 13 for SQL Server};"
+    "Server=HOME\\GIOAN;" 
     "Database=master;"
     "UID=SA;"
-    "PWD=Admin@123;"
+    "PWD=123456;"
     "TrustServerCertificate=yes;"
 )
 

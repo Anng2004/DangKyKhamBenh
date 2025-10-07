@@ -3,7 +3,7 @@
 import re
 from datetime import datetime
 from typing import Tuple, Optional
-from .qr_utils import analyze_cccd, get_new_province_from_old
+from .qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
 from .message_utils import error, warning, success, print_separator
 
 def validate_cccd_format(cccd: str) -> Tuple[bool, str]:
@@ -141,7 +141,7 @@ def input_birth_date_with_validation() -> str:
             print("Vui lòng nhập lại!")
 
 def input_gender_with_recommendation(cccd: str) -> str:
-    _, gender_cccd, _, _ = analyze_cccd(cccd)
+    _, gender_cccd, _, _ = phantich_cccd(cccd)
     
     if gender_cccd:
         print(f"💡 Hệ thống phân tích từ CCCD: Giới tính = {gender_cccd}")
@@ -158,7 +158,7 @@ def input_gender_with_recommendation(cccd: str) -> str:
             print("Vui lòng nhập lại!")
 
 def input_province_with_recommendation(cccd: str) -> str:
-    province_old, _, _, province_new = analyze_cccd(cccd)
+    province_old, _, _, province_new = phantich_cccd(cccd)
     recommended_province = province_new if province_new else province_old
     
     if recommended_province:

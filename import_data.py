@@ -4,7 +4,7 @@ import sys
 from db import get_conn, init_db
 from utils.message_utils import error, success, warning, info, print_separator
 
-def check_database_ready():
+def kiem_tra_ton_tai_DB():
     try:
         conn = get_conn()
         cur = conn.cursor()
@@ -152,11 +152,11 @@ def import_bac_si():
     conn.commit()
     conn.close()
 
-def assign_doctors_to_clinics():
+def phancong_bacsi_phongkham():
     conn = get_conn()
     cur = conn.cursor()
     
-    assignments = [
+    ds_phan_cong_bs_pk = [
         ('BS001', 'PK001'),
         ('BS002', 'PK002'),
         ('BS003', 'PK003'),
@@ -175,7 +175,7 @@ def assign_doctors_to_clinics():
     ]
     
     print("🔄 Đang gán bác sĩ vào phòng khám...")
-    for ma_bs, ma_pk in assignments:
+    for ma_bs, ma_pk in ds_phan_cong_bs_pk:
         try:
             cur.execute("SELECT BS_ID FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
             bs_row = cur.fetchone()
@@ -192,9 +192,9 @@ def assign_doctors_to_clinics():
             pk_id = pk_row.PK_ID
             
             cur.execute("SELECT BS_ID FROM PhongKham WHERE PK_ID = ?", (pk_id,))
-            current_bs = cur.fetchone()
+            bs_ht = cur.fetchone()
             
-            if not current_bs or current_bs.BS_ID is None:
+            if not bs_ht or bs_ht.BS_ID is None:
                 cur.execute("UPDATE PhongKham SET BS_ID = ? WHERE PK_ID = ?", (bs_id, pk_id))
                 success(f"Đã gán bác sĩ {ma_bs} vào phòng khám {ma_pk}")
             else:
@@ -252,12 +252,12 @@ def main():
         error(f"Lỗi trong quá trình import: {e}")
 
 def main():
-    """Main function to import sample data"""
+    """Chạy import dữ liệu mẫu."""
     print("Bắt đầu import dữ liệu mẫu...")
     print_separator(60,"=")
     
     try:
-        check_database_ready()
+        kiem_tra_ton_tai_DB()
         
         import_phong_kham()
         print()
@@ -268,7 +268,7 @@ def main():
         import_bac_si()
         print()
         
-        assign_doctors_to_clinics()
+        phancong_bacsi_phongkham()
         print()
         
         print_separator(60,"=")

@@ -29,31 +29,31 @@ PROVINCE_CODES = {
 }
 
 # Mapping hành chính mới theo NQ 202/2025/QH15
-ADMIN_REORGANIZATION = {
+THONG_TIN_SAT_NHAP = {
     "merged": [
-        {"new": "Tuyên Quang", "includes": ["Hà Giang", "Tuyên Quang"]},
-        {"new": "Lào Cai", "includes": ["Lào Cai", "Yên Bái"]},
-        {"new": "Thái Nguyên", "includes": ["Bắc Kạn", "Thái Nguyên"]},
-        {"new": "Phú Thọ", "includes": ["Hòa Bình", "Vĩnh Phúc", "Phú Thọ"]},
-        {"new": "Bắc Ninh", "includes": ["Bắc Giang", "Bắc Ninh"]},
-        {"new": "Hưng Yên", "includes": ["Thái Bình", "Hưng Yên"]},
-        {"new": "Thành phố Hải Phòng", "includes": ["Hải Dương", "Thành phố Hải Phòng"]},
-        {"new": "Ninh Bình", "includes": ["Hà Nam", "Ninh Bình", "Nam Định"]},
-        {"new": "Quảng Trị", "includes": ["Quảng Bình", "Quảng Trị"]},
-        {"new": "Thành phố Đà Nẵng", "includes": ["Quảng Nam", "Thành phố Đà Nẵng"]},
-        {"new": "Quảng Ngãi", "includes": ["Quảng Ngãi", "Kon Tum"]},
-        {"new": "Gia Lai", "includes": ["Gia Lai", "Bình Định"]},
-        {"new": "Đắk Lắk", "includes": ["Phú Yên", "Đắk Lắk"]},
-        {"new": "Khánh Hòa", "includes": ["Khánh Hòa", "Ninh Thuận"]},
-        {"new": "Lâm Đồng", "includes": ["Đắk Nông", "Lâm Đồng", "Bình Thuận"]},
-        {"new": "Thành phố Hồ Chí Minh", "includes": ["Bình Dương", "Thành phố Hồ Chí Minh", "Bà Rịa - Vũng Tàu"]},
-        {"new": "Đồng Nai", "includes": ["Bình Phước", "Đồng Nai"]},
-        {"new": "Tây Ninh", "includes": ["Long An", "Tây Ninh"]},
-        {"new": "Thành phố Cần Thơ", "includes": ["Sóc Trăng", "Hậu Giang", "Thành phố Cần Thơ"]},
-        {"new": "Vĩnh Long", "includes": ["Bến Tre", "Vĩnh Long", "Trà Vinh"]},
-        {"new": "Đồng Tháp", "includes": ["Tiền Giang", "Đồng Tháp"]},
-        {"new": "Cà Mau", "includes": ["Bạc Liêu", "Cà Mau"]},
-        {"new": "An Giang", "includes": ["Kiên Giang", "An Giang"]}
+        {"Don_vi_moi": "Tuyên Quang", "don_vi_truoc_sat_nhap": ["Hà Giang", "Tuyên Quang"]},
+        {"Don_vi_moi": "Lào Cai", "don_vi_truoc_sat_nhap": ["Lào Cai", "Yên Bái"]},
+        {"Don_vi_moi": "Thái Nguyên", "don_vi_truoc_sat_nhap": ["Bắc Kạn", "Thái Nguyên"]},
+        {"Don_vi_moi": "Phú Thọ", "don_vi_truoc_sat_nhap": ["Hòa Bình", "Vĩnh Phúc", "Phú Thọ"]},
+        {"Don_vi_moi": "Bắc Ninh", "don_vi_truoc_sat_nhap": ["Bắc Giang", "Bắc Ninh"]},
+        {"Don_vi_moi": "Hưng Yên", "don_vi_truoc_sat_nhap": ["Thái Bình", "Hưng Yên"]},
+        {"Don_vi_moi": "Thành phố Hải Phòng", "don_vi_truoc_sat_nhap": ["Hải Dương", "Thành phố Hải Phòng"]},
+        {"Don_vi_moi": "Ninh Bình", "don_vi_truoc_sat_nhap": ["Hà Nam", "Ninh Bình", "Nam Định"]},
+        {"Don_vi_moi": "Quảng Trị", "don_vi_truoc_sat_nhap": ["Quảng Bình", "Quảng Trị"]},
+        {"Don_vi_moi": "Thành phố Đà Nẵng", "don_vi_truoc_sat_nhap": ["Quảng Nam", "Thành phố Đà Nẵng"]},
+        {"Don_vi_moi": "Quảng Ngãi", "don_vi_truoc_sat_nhap": ["Quảng Ngãi", "Kon Tum"]},
+        {"Don_vi_moi": "Gia Lai", "don_vi_truoc_sat_nhap": ["Gia Lai", "Bình Định"]},
+        {"Don_vi_moi": "Đắk Lắk", "don_vi_truoc_sat_nhap": ["Phú Yên", "Đắk Lắk"]},
+        {"Don_vi_moi": "Khánh Hòa", "don_vi_truoc_sat_nhap": ["Khánh Hòa", "Ninh Thuận"]},
+        {"Don_vi_moi": "Lâm Đồng", "don_vi_truoc_sat_nhap": ["Đắk Nông", "Lâm Đồng", "Bình Thuận"]},
+        {"Don_vi_moi": "Thành phố Hồ Chí Minh", "don_vi_truoc_sat_nhap": ["Bình Dương", "Thành phố Hồ Chí Minh", "Bà Rịa - Vũng Tàu"]},
+        {"Don_vi_moi": "Đồng Nai", "don_vi_truoc_sat_nhap": ["Bình Phước", "Đồng Nai"]},
+        {"Don_vi_moi": "Tây Ninh", "don_vi_truoc_sat_nhap": ["Long An", "Tây Ninh"]},
+        {"Don_vi_moi": "Thành phố Cần Thơ", "don_vi_truoc_sat_nhap": ["Sóc Trăng", "Hậu Giang", "Thành phố Cần Thơ"]},
+        {"Don_vi_moi": "Vĩnh Long", "don_vi_truoc_sat_nhap": ["Bến Tre", "Vĩnh Long", "Trà Vinh"]},
+        {"Don_vi_moi": "Đồng Tháp", "don_vi_truoc_sat_nhap": ["Tiền Giang", "Đồng Tháp"]},
+        {"Don_vi_moi": "Cà Mau", "don_vi_truoc_sat_nhap": ["Bạc Liêu", "Cà Mau"]},
+        {"Don_vi_moi": "An Giang", "don_vi_truoc_sat_nhap": ["Kiên Giang", "An Giang"]}
     ],
     "unchanged": [
         "Thành phố Hà Nội", "Cao Bằng", "Điện Biên", "Hà Tĩnh",
@@ -62,25 +62,25 @@ ADMIN_REORGANIZATION = {
     ]
 }
 
-def get_new_province_from_old(old_province: str) -> str:
+def lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu: str) -> str:
     """
     Mapping tỉnh cũ sang tỉnh mới theo NQ 202/2025/QH15
     
     Args:
-        old_province: Tên tỉnh cũ
+        don_vi_hanh_chinh_cu: Tên tỉnh cũ
         
     Returns:
         Tên tỉnh mới sau sắp xếp
     """
-    if not old_province:
-        return old_province
+    if not don_vi_hanh_chinh_cu:
+        return don_vi_hanh_chinh_cu
         
     # Kiểm tra tỉnh không đổi
-    if old_province in ADMIN_REORGANIZATION['unchanged']:
-        return old_province
+    if don_vi_hanh_chinh_cu in THONG_TIN_SAT_NHAP['Giữ Nguyên']:
+        return don_vi_hanh_chinh_cu
     
     # Xử lý các trường hợp đặc biệt
-    name_mappings = {
+    ten_day_du = {
         'Hà Nội': 'Thành phố Hà Nội',
         'TP.Hồ Chí Minh': 'Thành phố Hồ Chí Minh',
         'Hải Phòng': 'Thành phố Hải Phòng',
@@ -89,26 +89,26 @@ def get_new_province_from_old(old_province: str) -> str:
         'Thừa Thiên Huế': 'Thành phố Huế'
     }
     
-    mapped_name = name_mappings.get(old_province, old_province)
-    if mapped_name in ADMIN_REORGANIZATION['unchanged']:
+    mapped_name = ten_day_du.get(don_vi_hanh_chinh_cu, don_vi_hanh_chinh_cu)
+    if mapped_name in THONG_TIN_SAT_NHAP['Giữ Nguyên']:
         return mapped_name
     
     # Tìm trong danh sách sáp nhập
-    for merged in ADMIN_REORGANIZATION['merged']:
-        if mapped_name in merged['includes']:
-            return merged['new']
+    for merged in THONG_TIN_SAT_NHAP['Sát Nhập']:
+        if mapped_name in merged['Sát nhập đơn vị']:
+            return merged['Đơn vị mới']
         # Kiểm tra các biến thể tên
-        for include in merged['includes']:
-            if (old_province == include or 
-                old_province == include.replace('Thành phố ', '') or
-                old_province == include.replace('TP.', '') or
-                f'Thành phố {old_province}' == include or
-                f'TP.{old_province}' == include):
-                return merged['new']
+        for include in merged['Sát nhập đơn vị']:
+            if (don_vi_hanh_chinh_cu == include or 
+                don_vi_hanh_chinh_cu == include.replace('Thành phố ', '') or
+                don_vi_hanh_chinh_cu == include.replace('TP.', '') or
+                f'Thành phố {don_vi_hanh_chinh_cu}' == include or
+                f'TP.{don_vi_hanh_chinh_cu}' == include):
+                return merged['Đơn vị mới']
     
-    return old_province  # Trả về tên cũ nếu không tìm thấy
+    return don_vi_hanh_chinh_cu  # Trả về tên cũ nếu không tìm thấy
 
-def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int], Optional[str]]:
+def phantich_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int], Optional[str]]:
     """
     Phân tích số CCCD 12 chữ số để trích xuất thông tin
     
@@ -127,7 +127,7 @@ def analyze_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int]
         province_old = PROVINCE_CODES.get(province_code)
         
         # Mapping sang tỉnh mới
-        province_new = get_new_province_from_old(province_old) if province_old else None
+        province_new = lay_thongtin_tinhmoi_tu_tinhcu(province_old) if province_old else None
         
         # Số thứ 4: mã giới tính và thế kỷ
         gender_code = cccd[3]
@@ -272,7 +272,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
             error("Họ tên không được để trống")
             return None
         
-        extracted_province_old, extracted_gender, extracted_year, extracted_province_new = analyze_cccd(cccd)
+        extracted_province_old, extracted_gender, extracted_year, extracted_province_new = phantich_cccd(cccd)
         
         if not gioi_tinh and extracted_gender:
             gioi_tinh = extracted_gender
@@ -351,7 +351,7 @@ def display_patient_info(qr_info: QRPatientInfo) -> None:
     
     # Hiển thị thông tin phân tích từ CCCD
     print("\n📊 PHÂN TÍCH CCCD:")
-    province_old, gender, birth_year, province_new = analyze_cccd(qr_info.cccd)
+    province_old, gender, birth_year, province_new = phantich_cccd(qr_info.cccd)
     if province_old:
         print(f"   🗺️  Nơi khai sinh (cũ): {province_old}")
     if province_new:

@@ -131,7 +131,7 @@ class BenhNhanRepo:
         current_year = datetime.datetime.now().year
         year_suffix = str(current_year)[-2:]  # Last 2 digits of year
         
-        # Get the next ordinal number for this year
+        # số thứ tự trong năm
         cur.execute("""
             SELECT COUNT(*) as count 
             FROM BenhNhan 
@@ -142,7 +142,7 @@ class BenhNhanRepo:
         count = row.count if row else 0
         ordinal = count + 1
         
-        # Format as 6-digit ordinal (pad with zeros)
+        # định dạng PID: YY + 6 số thứ tự (ví dụ: 240001)
         pid = f"{year_suffix}{ordinal:06d}"
         conn.close()
         return pid
@@ -156,7 +156,7 @@ class BenhNhanRepo:
     ) -> str:
         conn = get_conn(); cur = conn.cursor()
 
-        # Generate PID
+        # tạo PID
         pid = self._generate_pid()
 
         # 1) Thêm bệnh nhân (dùng CONVERT kiểu 103 = dd/mm/yyyy)
@@ -170,7 +170,7 @@ class BenhNhanRepo:
         row = cur.fetchone()
         bn_id = str(row.BN_ID) if row else ""
 
-        # 2) Auto-register user nếu chưa tồn tại
+        # 2) tự động đăng ký user nếu chưa tồn tại
         init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
         cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
         exists = cur.fetchone() is not None
@@ -193,33 +193,30 @@ class BenhNhanRepo:
         nam_sinh: int = None,
         tinh: str = None
     ) -> str:
-        """Create patient with enhanced information from CCCD analysis"""
+        """Tạo thông tin bệnh nhân từ chuỗi CCCD với các thông tin bổ sung như năm sinh và tỉnh"""
         conn = get_conn(); cur = conn.cursor()
 
-        # Generate PID
+        # Tạo PID
         pid = self._generate_pid()
 
-        # Parse address components if province is available
+        # lấy phường xã từ tỉnh nếu có
         phuong_xa = ""
         if tinh:
-            # You can enhance this logic later to handle full addresses
+            
             phuong_xa = ""
 
-        # 1) Thêm bệnh nhân with enhanced info (dùng CONVERT kiểu 103 = dd/mm/yyyy)
+        # 1) 
         if tinh and nam_sinh:
-            # Insert with both province and birth year
             cur.execute("""
                 INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, PhuongXa, Tinh, user_created)
                 VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
             """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, phuong_xa, tinh))
         elif tinh:
-            # Insert with province only
             cur.execute("""
                 INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, Tinh, user_created)
                 VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
             """, (pid, ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, tinh))
         else:
-            # Fallback to standard insert
             cur.execute("""
                 INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, user_created)
                 VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
@@ -230,7 +227,7 @@ class BenhNhanRepo:
         row = cur.fetchone()
         bn_id = str(row.BN_ID) if row else ""
 
-        # 2) Auto-register user nếu chưa tồn tại
+        # 2) 
         init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
         cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
         exists = cur.fetchone() is not None
@@ -257,10 +254,9 @@ class BenhNhanRepo:
         """Create patient with full address information"""
         conn = get_conn(); cur = conn.cursor()
 
-        # Generate PID
+        # Tạo PID
         pid = self._generate_pid()
-
-        # 1) Thêm bệnh nhân with full address info (dùng CONVERT kiểu 103 = dd/mm/yyyy)
+        # 1) 
         cur.execute("""
             INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, NamSinh, SoCCCD, PhuongXa, Tinh, user_created)
             VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
@@ -271,7 +267,7 @@ class BenhNhanRepo:
         row = cur.fetchone()
         bn_id = str(row.BN_ID) if row else ""
 
-        # 2) Auto-register user nếu chưa tồn tại
+        # 2) 
         init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
         cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
         exists = cur.fetchone() is not None
@@ -297,11 +293,10 @@ class BenhNhanRepo:
         """Create patient from QR code data with full address"""
         conn = get_conn(); cur = conn.cursor()
 
-        # Generate PID
+        # Tạo PID
         pid = self._generate_pid()
 
-        # Parse address into PhuongXa and Tinh
-        # dia_chi format: "Thôn La Vang 1, Quảng Sơn, Ninh Sơn, Ninh Thuận"
+        # Tách phường xã và tỉnh từ địa chỉ đầy đủ
         address_parts = dia_chi.split(', ')
         if len(address_parts) >= 2:
             phuong_xa = ', '.join(address_parts[:-1])  # Everything except last part
@@ -310,7 +305,7 @@ class BenhNhanRepo:
             phuong_xa = dia_chi
             tinh = ""
 
-        # 1) Thêm bệnh nhân với địa chỉ (dùng CONVERT kiểu 103 = dd/mm/yyyy)
+        # 1) 
         cur.execute("""
             INSERT INTO BenhNhan(PID, HoTen, GioiTinh, NgaySinh, SoCCCD, SoCMND, PhuongXa, Tinh, user_created)
             VALUES (?, ?, ?, CONVERT(date, ?, 103), ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
@@ -321,7 +316,7 @@ class BenhNhanRepo:
         row = cur.fetchone()
         bn_id = str(row.BN_ID) if row else ""
 
-        # 2) Auto-register user với username từ CCCD
+        # 2) 
         init_pass = self._mk_pass_from_cccd_and_dob(so_cccd, ngay_sinh_ddmmyyyy)
         cur.execute("SELECT 1 FROM [user] WHERE username = ?", (so_cccd,))
         exists = cur.fetchone() is not None
@@ -492,8 +487,8 @@ class TiepNhanRepo:
         
         if not row: return None
         
-        ma_bn = f"BN{str(row.BN_ID)[:8]}"  # Use first 8 chars of UUID for ma_bn
-        pid = row.PID if row.PID else "00000000"  # Default PID if null
+        ma_bn = f"BN{str(row.BN_ID)[:8]}"  
+        pid = row.PID if row.PID else "00000000"  # PID mặc định nếu null
         bn = BenhNhan(str(row.BN_ID), ma_bn, pid, row.HoTen, row.GioiTinh, row.NamSinh, row.SoCCCD)
         dv = DichVu(str(row.dv_id), row.MaDichVu, row.TenDichVu, row.GiaDichVu) if row.dv_id else None
         pk = PhongKham(str(row.PK_ID), row.MaPhong, row.TenPhong) if row.PK_ID else None
@@ -515,7 +510,7 @@ class BacSiRepo:
             VALUES (?, ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
         """, (ma_bs, ho_ten, chuyen_khoa, so_dt, email))
         conn.commit()
-        # Get the newly created ID
+        # lấy BS_ID mới tạo
         cur.execute("SELECT BS_ID FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
         row = cur.fetchone()
         conn.close()
@@ -577,7 +572,7 @@ class BacSiRepo:
         """Gán bác sĩ vào phòng khám (cập nhật PhongKham.BS_ID)"""
         conn = get_conn(); cur = conn.cursor()
         
-        # Get BS_ID from ma_bs
+        # lấy BS_ID từ ma_bs
         cur.execute("SELECT BS_ID FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
         bs_row = cur.fetchone()
         if not bs_row:
@@ -586,7 +581,7 @@ class BacSiRepo:
         
         bs_id = str(bs_row.BS_ID)
         
-        # Update PhongKham
+        # Update Phòng khám
         cur.execute("UPDATE PhongKham SET BS_ID = ? WHERE MaPhong = ?", (bs_id, ma_phong))
         success = cur.rowcount > 0
         conn.commit(); conn.close()

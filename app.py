@@ -212,7 +212,7 @@ class MenuManager:
                 case 1: self.controller.hien_thi_danh_sach_bac_si_cho_user()
                 case 2: self.add_bac_si()
                 case 3: self.assign_bac_si_to_phong_kham()
-                case 4: self.list_bac_si_by_phong_kham()
+                case 4: self.ds_bac_si_by_phong_kham()
                 case 5: self.delete_bac_si()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
@@ -484,7 +484,7 @@ class MenuManager:
             # Step 7: Confirm before saving (default Y)
             if confirm_with_default_yes("\n📝 Bạn có muốn lưu thông tin bệnh nhân này không?"):
                 # Create patient with address information
-                self.controller.them_benh_nhan_full(ho_ten, gioi_tinh, ngay_sinh, so_cccd, phuong_xa, tinh)
+                self.controller.them_benh_nhan_daydu(ho_ten, gioi_tinh, ngay_sinh, so_cccd, phuong_xa, tinh)
                 
                 print("\n✅ Đã thêm bệnh nhân thành công!")
                 
@@ -592,7 +592,7 @@ class MenuManager:
             ma_bs = input("Mã bác sĩ (để trống để auto-assign): ").strip()
             
             # Step 5: Create reception and display comprehensive summary
-            tiep_nhan, cost = self.controller.tiep_nhan_enhanced(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            tiep_nhan, cost = self.controller.them_tiep_nhan(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
             
             if tiep_nhan:
                 print("\n✅ THÔNG TIN TỔNG HỢP TIẾP NHẬN")
@@ -922,7 +922,7 @@ class MenuManager:
     def export_benh_nhan(self):
         """Export bệnh nhân list to Excel with enhanced features"""
         try:
-            benh_nhan_list = self.controller.model.list_benh_nhan()
+            benh_nhan_list = self.controller.model.ds_benh_nhan()
             if not benh_nhan_list:
                 error("Không có dữ liệu bệnh nhân để xuất!")
                 return
@@ -960,7 +960,7 @@ class MenuManager:
     def export_tiep_nhan(self):
         """Export tiếp nhận list to Excel with enhanced features"""
         try:
-            tiep_nhan_list = self.controller.model.list_tiep_nhan()
+            tiep_nhan_list = self.controller.model.ds_tiep_nhan()
             if not tiep_nhan_list:
                 error("Không có dữ liệu tiếp nhận để xuất!")
                 return
@@ -998,7 +998,7 @@ class MenuManager:
     def export_dich_vu_report(self):
         """Export dịch vụ report to Excel with enhanced features"""
         try:
-            dich_vu_list = self.controller.model.list_dich_vu()
+            dich_vu_list = self.controller.model.ds_dich_vu()
             if not dich_vu_list:
                 error("Không có dữ liệu dịch vụ để xuất!")
                 return
@@ -1036,7 +1036,7 @@ class MenuManager:
     def export_phong_kham_report(self):
         """Export phòng khám report to Excel with enhanced features"""
         try:
-            phong_kham_list = self.controller.model.list_phong_kham()
+            phong_kham_list = self.controller.model.ds_phong_kham()
             if not phong_kham_list:
                 error("Không có dữ liệu phòng khám để xuất!")
                 return
@@ -1075,10 +1075,10 @@ class MenuManager:
         """Export comprehensive summary report with multiple sheets"""
         try:
             # Get all data
-            benh_nhan_list = self.controller.model.list_benh_nhan()
-            tiep_nhan_list = self.controller.model.list_tiep_nhan()
-            dich_vu_list = self.controller.model.list_dich_vu()
-            phong_kham_list = self.controller.model.list_phong_kham()
+            benh_nhan_list = self.controller.model.ds_benh_nhan()
+            tiep_nhan_list = self.controller.model.ds_tiep_nhan()
+            dich_vu_list = self.controller.model.ds_dich_vu()
+            phong_kham_list = self.controller.model.ds_phong_kham()
             
             # Initialize report manager
             report_mgr = self.__init_report_manager()
@@ -1138,7 +1138,7 @@ class MenuManager:
     # =============== NEW STATISTICAL REPORTS ===============
     
     def export_statistical_report(self):
-        """Export comprehensive statistical report"""
+        """Xuất báo cáo thống kê tổng hợp"""
         try:
             report_mgr = self.__init_report_manager()
             result_path = report_mgr.export_statistical_report(
@@ -1156,7 +1156,7 @@ class MenuManager:
             error(f"Lỗi khi xuất báo cáo thống kê: {e}")
 
     def export_revenue_report(self):
-        """Export revenue analysis report"""
+        """xuất báo cáo doanh thu và phân tích doanh thu"""
         try:
             report_mgr = self.__init_report_manager()
             result_path = report_mgr.export_revenue_report(
@@ -1174,11 +1174,11 @@ class MenuManager:
             error(f"Lỗi khi xuất báo cáo doanh thu: {e}")
 
     def export_bac_si_report(self):
-        """Export bác sĩ report with clinic assignments"""
+        """Xuất báo cáo danh sách bác sĩ"""
         try:
             # Get bác sĩ data
             try:
-                bac_si_list = self.controller.model.list_bac_si()
+                bac_si_list = self.controller.model.ds_bac_si()
             except:
                 error("Không thể lấy danh sách bác sĩ!")
                 return
@@ -1224,7 +1224,7 @@ class MenuManager:
             today = date.today()
             
             # Filter today's tiếp nhận
-            tiep_nhan_list = self.controller.model.list_tiep_nhan()
+            tiep_nhan_list = self.controller.model.ds_tiep_nhan()
             today_tiep_nhan = []
             
             for tn in tiep_nhan_list:
@@ -1326,11 +1326,11 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi gán bác sĩ vào phòng khám: {e}")
 
-    def list_bac_si_by_phong_kham(self):
+    def ds_bac_si_by_phong_kham(self):
         """List bac si by phong kham"""
         try:
             print("📋 Danh sách phòng khám:")
-            phong_kham_list = self.controller.model.list_phong_kham()
+            phong_kham_list = self.controller.model.ds_phong_kham()
             for i, pk in enumerate(phong_kham_list, 1):
                 print(f"{i}. {pk}")
             
