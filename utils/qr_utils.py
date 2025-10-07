@@ -156,8 +156,8 @@ def phantich_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int
         return None, None, None, None
 
 @dataclass
-class QRPatientInfo:
-    """Data class for patient information from QR code"""
+class QRbenh_nhanInfo:
+    """Data class for benh_nhan information from QR code"""
     cccd: str
     cmnd: str
     ho_ten: str
@@ -242,7 +242,7 @@ class QRPatientInfo:
         except (ValueError, IndexError, AttributeError):
             return self.ngay_sinh
 
-def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
+def parse_qr_code(qr_string: str) -> Optional[QRbenh_nhanInfo]:
     try:
         parts = qr_string.strip().split('|')
         
@@ -304,7 +304,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
                 error(f"Ngày sinh không hợp lệ: {ngay_sinh} (phải là DDMMYYYY, DD/MM/YYYY, DD-MM-YYYY hoặc YYYY)")
                 return None
         
-        return QRPatientInfo(
+        return QRbenh_nhanInfo(
             cccd=cccd,
             cmnd=cmnd,  # CMND có thể để trống
             ho_ten=ho_ten,
@@ -317,7 +317,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRPatientInfo]:
         error(f"Lỗi khi phân tích QR code: {e}")
         return None
 
-def display_patient_info(qr_info: QRPatientInfo) -> None:
+def display_benh_nhan_info(qr_info: QRbenh_nhanInfo) -> None:
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN TỪ QR CODE")
     print_separator(60,"=")
@@ -363,8 +363,8 @@ def display_patient_info(qr_info: QRPatientInfo) -> None:
     
     print_separator(60,"=")
 
-def generate_username_from_qr(qr_info: QRPatientInfo) -> str:
+def generate_username_from_qr(qr_info: QRbenh_nhanInfo) -> str:
     return f"BN{qr_info.cccd[-6:]}"
 
-def generate_password_from_qr(qr_info: QRPatientInfo) -> str:
+def generate_password_from_qr(qr_info: QRbenh_nhanInfo) -> str:
     return qr_info.ngay_sinh

@@ -9,7 +9,6 @@ from utils.message_utils import (
     success, error, warning, print_header,print_separator
 )
 
-# Try to import pandas, set flag if available
 try:
     import pandas as pd
     PANDAS_AVAILABLE = True
@@ -31,7 +30,7 @@ class MenuManager:
             self.user_main_menu()
 
     def admin_main_menu(self):
-        """Admin main menu with module selection"""
+        """Màn hình chính quản trị viên với đầy đủ chức năng"""
         while True:
             print_header("           HỆ THỐNG QUẢN LÝ KHÁM BỆNH -\n              MENU QUẢN TRỊ VIÊN",50)
             print("1. 📋 Quản lý Tiếp nhận")
@@ -39,7 +38,7 @@ class MenuManager:
             print("3. 🩺 Quản lý Dịch vụ")
             print("4. 👳 Quản lý Bệnh nhân")
             print("5. 👨‍⚕️ Quản lý Bác sĩ")
-            print("6. 👤 Quản lý Người dùng")
+            print("6. 👤 Quản lý Tài khoản")
             print("7. 📊 Báo cáo & Xuất Excel")
             print("8. 🏛️ Migration dữ liệu tỉnh bệnh nhân")
             print("0. 🚪 Đăng xuất")
@@ -51,23 +50,23 @@ class MenuManager:
                 error("Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.tiep_nhan_menu()
-                case 2: self.phong_kham_menu()
-                case 3: self.dich_vu_menu()
-                case 4: self.benh_nhan_menu()
-                case 5: self.bac_si_menu()
-                case 6: self.user_management_menu()
-                case 7: self.report_menu()
-                case 8: self.migration_menu()
+                case 1: self.menu_tiep_nhan()
+                case 2: self.menu_phong_kham()
+                case 3: self.menu_dich_vu()
+                case 4: self.menu_benh_nhan()
+                case 5: self.menu_bac_si()
+                case 6: self.menu_quan_ly_tai_khoan()
+                case 7: self.menu_bao_cao()
+                case 8: self.menu_cap_nhat_du_lieu()
                 case 0: print("👋 Đăng xuất..."); break
                 case _: error("Chức năng không tồn tại!")
 
     def user_main_menu(self):
-        """User main menu with limited access"""
+        """màn hình chính cho tài khoản khách bình thường"""
         while True:
             print("\n" + "="*50)
             print("           HỆ THỐNG ĐĂNG KÝ KHÁM BỆNH")
-            print("                MENU BỆNH NHÂN")
+            print("                MÀN HÌNH KHÁCH HÀNG - BỆNH NHÂN")
             print_separator(50,"=")
             print("1. 👀 Xem thông tin dịch vụ")
             print("2. 🏥 Xem thông tin phòng khám")
@@ -85,14 +84,14 @@ class MenuManager:
             match choice:
                 case 1: self.controller.hien_thi_danh_sach_dich_vu_cho_user()
                 case 2: self.controller.hien_thi_danh_sach_phong_kham_cho_user()
-                case 3: self.user_register_appointment()
+                case 3: self.khach_hang_dang_ky_kham()
                 case 4: self.controller.hien_thi_lich_su_kham_cua_user(self.username)
                 case 5: self.controller.hien_thi_lich_su_kham_cua_user_chi_tiet(self.username)
                 case 0: print("👋 Đăng xuất..."); break
                 case _: error("Chức năng không tồn tại!")
 
-    def phong_kham_menu(self):
-        """Phòng khám management submenu"""
+    def menu_phong_kham(self):
+        """Quản lý phòng khám sub_menu"""
         while True:
             print("\n" + "="*40)
             print("         QUẢN LÝ PHÒNG KHÁM")
@@ -110,13 +109,13 @@ class MenuManager:
 
             match choice:
                 case 1: self.controller.hien_thi_danh_sach_phong_kham_cho_user()
-                case 2: self.add_phong_kham()
-                case 3: self.delete_phong_kham()
+                case 2: self.them_phong_kham()
+                case 3: self.xoa_phong_kham()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def dich_vu_menu(self):
-        """Dịch vụ management submenu"""
+    def menu_dich_vu(self):
+        """Quản lý Dịch vụ sub_menu"""
         while True:
             print("\n" + "="*40)
             print("         QUẢN LÝ DỊCH VỤ")
@@ -134,13 +133,13 @@ class MenuManager:
 
             match choice:
                 case 1: self.controller.hien_thi_danh_sach_dich_vu_cho_user()
-                case 2: self.add_dich_vu()
-                case 3: self.delete_dich_vu()
+                case 2: self.them_dich_vu()
+                case 3: self.xoa_dich_vu()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def benh_nhan_menu(self):
-        """Bệnh nhân management submenu"""
+    def menu_benh_nhan(self):
+        """Quản lý Bệnh nhân sub_menu"""
         while True:
             print("\n" + "="*40)
             print("         QUẢN LÝ BỆNH NHÂN")
@@ -158,13 +157,13 @@ class MenuManager:
 
             match choice:
                 case 1: self.controller.hien_thi_danh_sach_benh_nhan_cho_admin()
-                case 2: self.add_benh_nhan()
-                case 3: self.search_benh_nhan()
+                case 2: self.them_benh_nhan()
+                case 3: self.tim_kiem_benh_nhan()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def tiep_nhan_menu(self):
-        """Tiếp nhận management submenu"""
+    def menu_tiep_nhan(self):
+        """Quản lý Tiếp nhận sub_menu"""
         while True:
             print("\n" + "="*40)
             print("         QUẢN LÝ TIẾP NHẬN")
@@ -182,15 +181,15 @@ class MenuManager:
                 error("Vui lòng nhập số hợp lệ!"); continue
 
             match choice:
-                case 1: self.qr_scan_tiep_nhan()
-                case 2: self.add_tiep_nhan()
+                case 1: self.tiep_nhan_bang_chuoi_qr_cccd()
+                case 2: self.them_tiep_nhan()
                 case 3: self.controller.hien_thi_danh_sach_tiep_nhan_cho_admin()
-                case 4: self.cancel_tiep_nhan()
+                case 4: self.huy_tiep_nhan()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def bac_si_menu(self):
-        """Bac si management submenu"""
+    def menu_bac_si(self):
+        """Quản lý Bác Sĩ sub_menu"""
         while True:
             print("\n" + "="*40)
             print("         QUẢN LÝ BÁC SĨ")
@@ -210,18 +209,18 @@ class MenuManager:
 
             match choice:
                 case 1: self.controller.hien_thi_danh_sach_bac_si_cho_user()
-                case 2: self.add_bac_si()
-                case 3: self.assign_bac_si_to_phong_kham()
+                case 2: self.them_bac_si()
+                case 3: self.phan_cong_bac_si_vao_phong_kham()
                 case 4: self.ds_bac_si_by_phong_kham()
-                case 5: self.delete_bac_si()
+                case 5: self.xoa_bac_si()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def user_management_menu(self):
-        """User management submenu"""
+    def menu_quan_ly_tai_khoan(self):
+        """Quản lý tài khoản sub_menu"""
         while True:
             print("\n" + "="*40)
-            print("         QUẢN LÝ NGƯỜI DÙNG")
+            print("         Quản lý Tài khoản")
             print_separator(40,"=")
             print("1. 📋 Danh sách người dùng")
             print("2. ➕ Tạo tài khoản mới")
@@ -245,8 +244,8 @@ class MenuManager:
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def report_menu(self):
-        """Enhanced Report and Excel export submenu"""
+    def menu_bao_cao(self):
+        """Báo cáo & Xuất Excel sub_menu"""
         while True:
             print("\n" + "="*60)
             print("           📊 BÁO CÁO & XUẤT EXCEL - NÂNG CAP")
@@ -282,18 +281,18 @@ class MenuManager:
                 case 2: self.export_tiep_nhan()
                 case 3: self.export_dich_vu_report()
                 case 4: self.export_phong_kham_report()
-                case 5: self.export_bac_si_report()
-                case 6: self.export_statistical_report()
-                case 7: self.export_revenue_report()
-                case 8: self.export_daily_report()
-                case 9: self.export_summary_report()
-                case 10: self.open_reports_folder()
-                case 11: self.cleanup_old_reports()
+                case 5: self.export_ds_bac_si()
+                case 6: self.export_bao_cao_thong_ke()
+                case 7: self.export_bao_cao_doanh_thu()
+                case 8: self.export_bao_cao_hang_ngay()
+                case 9: self.export_bao_cao_tong_hop()
+                case 10: self.mo_thu_muc_baocao()
+                case 11: self.xoa_file_bao_cao_cu()
                 case 0: break
                 case _: error("Chức năng không tồn tại!")
 
-    def open_reports_folder(self):
-        """Open reports folder in file manager"""
+    def mo_thu_muc_baocao(self):
+        """Mở thư mục báo cáo trong trình quản lý file"""
         try:
             import subprocess
             import platform
@@ -320,13 +319,12 @@ class MenuManager:
             error(f"Không thể mở thư mục: {e}")
             print(f"📁 Đường dẫn thủ công: {os.path.abspath('reports')}")
 
-    def cleanup_old_reports(self):
+    def xoa_file_bao_cao_cu(self):
         """Clean up old report files"""
         try:
             import glob
             from datetime import datetime, timedelta
             
-            # Ask for retention days
             try:
                 days = int(input("Xóa báo cáo cũ hơn bao nhiêu ngày? (mặc định 30): ").strip() or "30")
             except ValueError:
@@ -339,35 +337,35 @@ class MenuManager:
                 error("Thư mục báo cáo không tồn tại!")
                 return
             
-            # Find old files
-            old_files = []
+            # tìm tất cả file .xlsx và .csv trong thư mục và các thư mục con
+            file_bao_cao_cu = []
             for root, dirs, files in os.walk(reports_path):
                 for file in files:
                     if file.endswith(('.xlsx', '.csv')):
                         file_path = os.path.join(root, file)
                         file_time = datetime.fromtimestamp(os.path.getctime(file_path))
                         if file_time < cutoff_date:
-                            old_files.append((file_path, file_time))
+                            file_bao_cao_cu.append((file_path, file_time))
             
-            if not old_files:
+            if not file_bao_cao_cu:
                 success(f"Không có báo cáo nào cũ hơn {days} ngày!")
                 return
             
-            print(f"\n📋 Tìm thấy {len(old_files)} file báo cáo cũ:")
-            for file_path, file_time in old_files:
+            print(f"\n📋 Tìm thấy {len(file_bao_cao_cu)} file báo cáo cũ:")
+            for file_path, file_time in file_bao_cao_cu:
                 print(f"  • {os.path.basename(file_path)} ({file_time.strftime('%d/%m/%Y')})")
             
-            confirm = input(f"\n⚠️  Xác nhận xóa {len(old_files)} file? (y/n): ").strip().lower()
-            if confirm == 'y':
-                deleted = 0
-                for file_path, _ in old_files:
+            xac_nhan = input(f"\n⚠️  Xác nhận xóa {len(file_bao_cao_cu)} file? (y/n): ").strip().lower()
+            if xac_nhan == 'y':
+                file_xoa = 0
+                for file_path, _ in file_bao_cao_cu:
                     try:
                         os.remove(file_path)
-                        deleted += 1
+                        file_xoa += 1
                     except Exception as e:
                         error(f"Không thể xóa {os.path.basename(file_path)}: {e}")
                 
-                success(f"Đã xóa {deleted}/{len(old_files)} file báo cáo cũ!")
+                success(f"Đã xóa {file_xoa}/{len(file_bao_cao_cu)} file báo cáo cũ!")
             else:
                 error("Đã hủy thao tác dọn dẹp.")
                 
@@ -376,8 +374,8 @@ class MenuManager:
 
     # =============== IMPLEMENTATION METHODS ===============
 
-    def add_phong_kham(self):
-        """Add new phòng khám"""
+    def them_phong_kham(self):
+        """Thêm mới phòng khám"""
         try:
             ma = input("Mã phòng: ").strip()
             ten = input("Tên phòng: ").strip()
@@ -389,7 +387,7 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi thêm phòng khám: {e}")
 
-    def delete_phong_kham(self):
+    def xoa_phong_kham(self):
         """Delete phòng khám"""
         try:
             ma = input("Nhập mã phòng cần xóa: ").strip()
@@ -404,7 +402,7 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xóa phòng khám: {e}")
 
-    def add_dich_vu(self):
+    def them_dich_vu(self):
         """Add new dịch vụ"""
         try:
             ma = input("Mã dịch vụ: ").strip()
@@ -420,7 +418,7 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi thêm dịch vụ: {e}")
 
-    def delete_dich_vu(self):
+    def xoa_dich_vu(self):
         """Delete dịch vụ"""
         try:
             ma = input("Nhập mã dịch vụ cần xóa: ").strip()
@@ -435,71 +433,71 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xóa dịch vụ: {e}")
 
-    def add_benh_nhan(self):
-        """Add new bệnh nhân with comprehensive validation"""
+    def them_benh_nhan(self):
+        """Thêm mới bệnh nhân - Thủ công nhập liệu từng bước"""
         try:
             from utils.validation_utils import (
-                input_cccd_with_validation, 
-                input_full_name_with_validation,
-                input_gender_with_recommendation,
-                input_birth_date_with_validation,
-                input_ward_commune_with_validation,
-                input_province_with_recommendation,
-                display_patient_confirmation_info,
-                display_existing_patient_info,
-                confirm_with_default_yes
+                nhap_thong_tin_cccd, 
+                nhap_thong_tin_hoten,
+                nhap_thong_tin_gioitinh,
+                nhap_thong_tin_ngaysinh,
+                nhap_thong_tin_diachi_phuongxa,
+                nhap_thong_tin_diachi_tinh,
+                Hien_thi_thong_tin_xac_nhan_benhnhan,
+                Hien_thi_thong_tin_benhnhan,
+                xac_nhan_thong_tin
             )
             
             print("\n" + "="*50)
             print("           THÊM BỆNH NHÂN MỚI")
             print_separator(50,"=")
             
-            # Step 1: Input and validate CCCD (12 digits required)
-            so_cccd = input_cccd_with_validation()
+            # Bước 1: Nhập số CCCD và kiểm tra định dạng 12 số (bắt buộc)
+            so_cccd = nhap_thong_tin_cccd()
             
-            # Step 2: Check if CCCD already exists
-            existing_patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
-            if existing_patient:
+            # Bước 2: kiểm tra trùng CCCD
+            existing_benh_nhan = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+            if existing_benh_nhan:
                 warning("CCCD ĐÃ TỒN TẠI TRONG HỆ THỐNG!")
-                display_existing_patient_info(existing_patient)
+                Hien_thi_thong_tin_benhnhan(existing_benh_nhan)
                 error("Không thể tạo bệnh nhân trùng CCCD!")
                 print("Vui lòng kiểm tra lại hoặc sử dụng chức năng tìm kiếm bệnh nhân.")
                 return
             
-            # Step 3: Input other information with validation and recommendations
-            ho_ten = input_full_name_with_validation()
-            gioi_tinh = input_gender_with_recommendation(so_cccd)
+            # Bước 3: nhập thông tin họ tên và giới tính
+            ho_ten = nhap_thong_tin_hoten()
+            gioi_tinh = nhap_thong_tin_gioitinh(so_cccd)
             
-            # Step 4: Input and validate birth date (multiple formats supported)
-            ngay_sinh = input_birth_date_with_validation()
+            # Bước 4: Nhập thông tin ngày sinh
+            ngay_sinh = nhap_thong_tin_ngaysinh()
             
-            # Step 5: Input address information with recommendations
+            # Bước 5: Nhập thông tin địa chỉ
             print("\n🏠 Thông tin địa chỉ:")
-            phuong_xa = input_ward_commune_with_validation()
-            tinh = input_province_with_recommendation(so_cccd)
+            phuong_xa = nhap_thong_tin_diachi_phuongxa()
+            tinh = nhap_thong_tin_diachi_tinh(so_cccd)
             
-            # Step 6: Display confirmation information (similar to QR creation)
-            display_patient_confirmation_info(ho_ten, gioi_tinh, ngay_sinh, so_cccd)
+            # Bước 6: Hiển thị thông tin xác nhận
+            Hien_thi_thong_tin_xac_nhan_benhnhan(ho_ten, gioi_tinh, ngay_sinh, so_cccd)
             
-            # Step 7: Confirm before saving (default Y)
-            if confirm_with_default_yes("\n📝 Bạn có muốn lưu thông tin bệnh nhân này không?"):
-                # Create patient with address information
+            # Bước 7: Xác nhận lưu thông tin
+            if xac_nhan_thong_tin("\n📝 Bạn có muốn lưu thông tin bệnh nhân này không?"):
+                # Tạo bệnh nhân
                 self.controller.them_benh_nhan_daydu(ho_ten, gioi_tinh, ngay_sinh, so_cccd, phuong_xa, tinh)
                 
                 print("\n✅ Đã thêm bệnh nhân thành công!")
                 
-                # Display created patient information
-                created_patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
-                if created_patient:
+                # Hiển thị thông tin bệnh nhân vừa tạo
+                created_benh_nhan = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+                if created_benh_nhan:
                     print("\n" + "="*60)
                     print("           THÔNG TIN BỆNH NHÂN VỪA TẠO")
                     print_separator(60,"=")
-                    print(f"🆔 Mã BN: {created_patient.ma_bn}")
-                    print(f"📋 PID: {created_patient.pid}")
-                    print(f"📱 CCCD: {created_patient.so_cccd}")
-                    print(f"👤 Họ tên: {created_patient._ho_ten}")
-                    print(f"⚤ Giới tính: {created_patient._gioi_tinh}")
-                    print(f"🎂 Năm sinh: {created_patient.nam_sinh}")
+                    print(f"🆔 Mã BN: {created_benh_nhan.ma_bn}")
+                    print(f"📋 PID: {created_benh_nhan.pid}")
+                    print(f"📱 CCCD: {created_benh_nhan.so_cccd}")
+                    print(f"👤 Họ tên: {created_benh_nhan._ho_ten}")
+                    print(f"⚤ Giới tính: {created_benh_nhan._gioi_tinh}")
+                    print(f"🎂 Năm sinh: {created_benh_nhan.nam_sinh}")
                     if phuong_xa:
                         print(f"🏘️  Phường/Xã: {phuong_xa}")
                     print(f"🏙️  Tỉnh/TP: {tinh}")
@@ -512,8 +510,8 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi thêm bệnh nhân: {e}")
 
-    def search_benh_nhan(self):
-        """Search bệnh nhân by CCCD"""
+    def tim_kiem_benh_nhan(self):
+        """Tìm kiếm bệnh nhân bằng số CCCD"""
         try:
             so_cccd = input("Nhập số CCCD cần tìm: ").strip()
             if not so_cccd:
@@ -528,30 +526,30 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi tìm kiếm: {e}")
 
-    def add_tiep_nhan(self):
-        """Add new tiếp nhận with enhanced step-by-step display"""
+    def them_tiep_nhan(self):
+        """Đăng ký tiếp nhận mới - Thủ công nhập liệu từng bước"""
         try:
             print("📋 Đăng ký tiếp nhận - Mã tiếp nhận sẽ được tự động tạo")
             
-            # Step 1: Input CCCD and display patient info
+            # Bước 1: Nhập mã CCCD bệnh nhân
             so_cccd = input("CCCD bệnh nhân: ").strip()
             if not so_cccd:
                 error("CCCD không được để trống!")
                 return
             
-            # Get patient info and display
-            patient = self.controller.model.bn_repo.get_by_cccd(so_cccd)
-            if not patient:
+            # Lấy thông tin bệnh nhân theo số CCCD
+            benh_nhan = self.controller.model.bn_repo.get_by_cccd(so_cccd)
+            if not benh_nhan:
                 error("Không tìm thấy bệnh nhân với CCCD này!")
                 return
             
-            # Display patient information
-            from utils.validation_utils import display_patient_summary
+            # Hiển thị thông tin bệnh nhân
+            from utils.validation_utils import display_benh_nhan_summary
             print("\n📋 THÔNG TIN BỆNH NHÂN")
             print_separator(50,"=")
-            display_patient_summary(patient)
+            display_benh_nhan_summary(benh_nhan)
             
-            # Step 2: Display service list and get service selection
+            # Bước 2: Hiển thị danh sách dịch vụ và Chọn dịch vụ theo mã dịch vụ
             print("\n💉 DANH SÁCH DỊCH VỤ KỸ THUẬT")
             print_separator(50,"=")
             self.controller.hien_thi_danh_sach_dich_vu_cho_user()
@@ -561,13 +559,13 @@ class MenuManager:
                 error("Mã dịch vụ không được để trống!")
                 return
             
-            # Validate service exists
+            # Kiểm tra dịch vụ
             dich_vu = self.controller.model.dv_repo.get_by_ma(ma_dv)
             if not dich_vu:
                 error("Không tìm thấy dịch vụ với mã này!")
                 return
             
-            # Step 3: Display clinic list and get clinic selection
+            # Bước 3: Hiển thị danh sách phòng khám và Chọn phòng khám theo mã phòng khám
             print("\n🏥 DANH SÁCH PHÒNG KHÁM")
             print_separator(50,"=")
             self.controller.hien_thi_danh_sach_phong_kham_cho_user()
@@ -577,13 +575,13 @@ class MenuManager:
                 error("Mã phòng khám không được để trống!")
                 return
             
-            # Validate clinic exists
+            # kiểm tra phòng khám
             phong_kham = self.controller.model.pk_repo.get_by_ma(ma_pk)
             if not phong_kham:
                 error("Không tìm thấy phòng khám với mã này!")
                 return
             
-            # Step 4: Input reason for examination
+            # Bước 4: Nhập lý do khám (bắt buộc)
             ly_do = input("\nLý do khám: ").strip()
             if not ly_do:
                 error("Lý do khám không được để trống!")
@@ -591,7 +589,7 @@ class MenuManager:
             
             ma_bs = input("Mã bác sĩ (để trống để auto-assign): ").strip()
             
-            # Step 5: Create reception and display comprehensive summary
+            # Bước 5: Tạo và hiển thị thông tin tiếp nhận
             tiep_nhan, cost = self.controller.them_tiep_nhan(so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
             
             if tiep_nhan:
@@ -600,19 +598,19 @@ class MenuManager:
                 from utils.validation_utils import display_reception_summary
                 display_reception_summary(tiep_nhan, cost)
                 
-                from utils.validation_utils import confirm_with_default_yes
-                if confirm_with_default_yes("\nXác nhận đăng ký tiếp nhận"):
+                from utils.validation_utils import xac_nhan_thong_tin
+                if xac_nhan_thong_tin("\nXác nhận đăng ký tiếp nhận"):
                     success(f"Đăng ký tiếp nhận thành công! Mã tiếp nhận: {tiep_nhan.ma_tn}")
                 else:
-                    # Cancel the registration (delete the created record)
+                    # Bỏ qua không tạo thông tin tiếp nhận
                     self.controller.model.tn_repo.delete_by_ma(tiep_nhan.ma_tn)
-                    error("Đã hủy đăng ký tiếp nhận!")
+                    error("Bỏ qua không tạo thông tin tiếp nhận!")
             
         except Exception as e:
             error(f"Lỗi khi đăng ký tiếp nhận: {e}")
 
-    def cancel_tiep_nhan(self):
-        """Cancel tiếp nhận"""
+    def huy_tiep_nhan(self):
+        """Hủy tiếp nhận đã đăng ký"""
         try:
             ma_tn = input("Nhập mã tiếp nhận cần hủy: ").strip()
             if not ma_tn:
@@ -622,49 +620,49 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi hủy tiếp nhận: {e}")
 
-    def qr_scan_tiep_nhan(self):
-        """QR scan for patient registration and tiếp nhận"""
+    def tiep_nhan_bang_chuoi_qr_cccd(self):
+        """Đăng ký tiếp nhận bằng chuỗi QR code CCCD - Định dạng: CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi|NgayCap"""
         try:
-            print("\n📱 QUÉT QR CODE ĐĂNG KÝ TIẾP NHẬN")
+            print("\n📱 QUÉT QR CODE CĂN CƯỚC CÔNG DÂN - ĐĂNG KÝ TIẾP NHẬN")
             print_separator(50,"=")
-            print("Vui lòng nhập chuỗi QR code từ CCCD/CMND")
+            print("Vui lòng nhập chuỗi QR code từ CCCD")
             print("Định dạng: CCCD|CMND|HoTen|NgaySinh|GioiTinh|DiaChi|NgayCap")
             print("Ví dụ: 058090000000|26430000|Nguyễn Văn An|01011990|Nam|Thôn La Vang 1, Ninh Thuận|01012020")
-            
+            # Bước 1: Nhập chuỗi QR code
             qr_string = input("📱 QR Code: ").strip()
             if not qr_string:
                 error("QR code không được để trống!")
                 return
             
-            # Process QR scan
-            patient = self.controller.process_qr_scan(qr_string)
-            if not patient:
+            # Bước 2: Xử lý chuỗi QR code
+            benh_nhan = self.controller.process_qr_scan(qr_string)
+            if not benh_nhan:
                 return
             
-            print(f"\n✅ Sẽ sử dụng bệnh nhân: {patient._ho_ten} ({patient.ma_bn})")
+            print(f"\n✅ Sẽ sử dụng bệnh nhân: {benh_nhan._ho_ten} ({benh_nhan.ma_bn})")
             
-            # Continue with tiếp nhận registration
+            # Hiển thị thông tin dịch vụ và phòng khám
             print("\n📋 THÔNG TIN DỊCH VỤ & PHÒNG KHÁM")
             print_separator(40)
             
-            # Show services
+            # Bước 3: Hiển thị danh sách dịch vụ và Chọn dịch vụ theo mã dịch vụ
             print("Danh sách dịch vụ:")
             self.controller.hien_thi_danh_sach_dich_vu_cho_user()
-            
+            # Kiểm tra dịch vụ
             ma_dv = input("\nMã dịch vụ: ").strip()
             if not ma_dv:
                 error("Mã dịch vụ không được để trống!")
                 return
             
-            # Show clinics
+            # Bước 4: Hiển thị danh sách phòng khám và Chọn phòng khám theo mã phòng khám
             print("\nDanh sách phòng khám:")
             self.controller.hien_thi_danh_sach_phong_kham_cho_user()
-            
+            # Kiểm tra phòng khám
             ma_pk = input("\nMã phòng khám: ").strip()
             if not ma_pk:
                 error("Mã phòng khám không được để trống!")
                 return
-                
+            # Bước 5: Nhập lý do khám (bắt buộc)
             ly_do = input("Lý do khám: ").strip()
             if not ly_do:
                 error("Lý do khám không được để trống!")
@@ -672,14 +670,28 @@ class MenuManager:
                 
             ma_bs = input("Mã bác sĩ (để trống để auto-assign): ").strip()
             
-            # Create tiếp nhận
-            self.controller.tiep_nhan(patient.so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            # Bước 6: Tạo và hiển thị thông tin tiếp nhận
+            #self.controller.tiep_nhan(benh_nhan.so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            tiep_nhan, cost = self.controller.them_tiep_nhan(benh_nhan.so_cccd, ma_dv, ma_pk, ly_do, ma_bs)
+            if tiep_nhan:
+                print("\n✅ THÔNG TIN TỔNG HỢP TIẾP NHẬN")
+                print_separator(50,"=")
+                from utils.validation_utils import display_reception_summary
+                display_reception_summary(tiep_nhan, cost)
+                
+                from utils.validation_utils import xac_nhan_thong_tin
+                if xac_nhan_thong_tin("\nXác nhận đăng ký tiếp nhận"):
+                    success(f"Đăng ký tiếp nhận thành công! Mã tiếp nhận: {tiep_nhan.ma_tn}")
+                else:
+                    # Bỏ qua không tạo thông tin tiếp nhận
+                    self.controller.model.tn_repo.delete_by_ma(tiep_nhan.ma_tn)
+                    error("Bỏ qua không tạo thông tin tiếp nhận!")
             
         except Exception as e:
             error(f"Lỗi khi xử lý QR scan: {e}")
 
-    def user_register_appointment(self):
-        """User registration for appointment - Enhanced version with sequential display"""
+    def khach_hang_dang_ky_kham(self):
+        """Khách hàng đăng ký khám bệnh - Thủ công nhập liệu từng bước"""
         try:
             print("\n🏥 ĐĂNG KÝ KHÁM BỆNH")
             print_separator(50,"=")
@@ -687,7 +699,7 @@ class MenuManager:
             print(f"👤 Tài khoản: {self.username}")
             print_separator(50,"=")
             
-            # Step 1: Display services list and get service selection
+            # Bước 1: Hiển thị danh sách dịch vụ và Chọn dịch vụ theo mã dịch vụ
             print("\n🩺 BƯỚC 1: CHỌN DỊCH VỤ KHÁM")
             print_separator(40)
             self.controller.hien_thi_danh_sach_dich_vu_cho_user()
@@ -698,7 +710,7 @@ class MenuManager:
                 if not ma_dv:
                     error("Mã dịch vụ không được để trống! Vui lòng chọn từ danh sách trên.")
             
-            # Validate service exists
+            # Kiểm tra dịch vụ
             dich_vu = self.controller.model.dv_repo.get_by_ma(ma_dv)
             if not dich_vu:
                 error(f"Không tìm thấy dịch vụ với mã '{ma_dv}'!")
@@ -706,7 +718,7 @@ class MenuManager:
             
             success(f"Đã chọn dịch vụ: {dich_vu._ma_dv} - {dich_vu._ten_dv} ({dich_vu._gia:,}đ)")
             
-            # Step 2: Display clinics list and get clinic selection
+            # Bước 2 : Hiển thị danh sách phòng khám và Chọn phòng khám theo mã phòng khám
             print("\n🏥 BƯỚC 2: CHỌN PHÒNG KHÁM")
             print_separator(40)
             self.controller.hien_thi_danh_sach_phong_kham_cho_user()
@@ -717,7 +729,7 @@ class MenuManager:
                 if not ma_pk:
                     error("Mã phòng khám không được để trống! Vui lòng chọn từ danh sách trên.")
             
-            # Validate clinic exists
+            # Kiểm tra phòng khám
             phong_kham = self.controller.model.pk_repo.get_by_ma(ma_pk)
             if not phong_kham:
                 error(f"Không tìm thấy phòng khám với mã '{ma_pk}'!")
@@ -725,7 +737,7 @@ class MenuManager:
             
             success(f"Đã chọn phòng khám: {phong_kham._ma_phong} - {phong_kham._ten_phong}")
             
-            # Step 3: Input reason (mandatory)
+            # Bước 3: Nhập lý do khám (bắt buộc)
             print("\n📝 BƯỚC 3: LÝ DO KHÁM BỆNH")
             print_separator(40)
             ly_do = ""
@@ -736,7 +748,7 @@ class MenuManager:
             
             success(f"Lý do khám: {ly_do}")
             
-            # Step 4: Optional doctor selection
+            # Bước 4: Hiển thị danh sách bác sĩ và Chọn bác sĩ theo mã bác sĩ (tùy chọn)
             print("\n👨‍⚕️ BƯỚC 4: CHỌN BÁC SĨ (TÙY CHỌN)")
             print_separator(40)
             print("💡 Để trống để hệ thống tự động gán bác sĩ theo phòng khám")
@@ -745,7 +757,7 @@ class MenuManager:
             ma_bs = input("\n➤ Nhập mã bác sĩ (để trống để tự động chọn): ").strip()
             
             if ma_bs:
-                # Validate doctor exists if provided
+                # Kiểm tra bác sĩ
                 bac_si = self.controller.model.bs_repo.get_by_ma(ma_bs)
                 if not bac_si:
                     error(f"Không tìm thấy bác sĩ với mã '{ma_bs}'! Sẽ tự động gán bác sĩ.")
@@ -755,7 +767,7 @@ class MenuManager:
             else:
                 success("Sẽ tự động gán bác sĩ theo phòng khám")
             
-            # Step 5: Confirm and register
+            # Bước 5: Xác nhận đăng ký
             print("\n🔄 BƯỚC 5: XÁC NHẬN ĐĂNG KÝ")
             print_separator(40)
             print(f"📋 Dịch vụ: {dich_vu._ten_dv} ({dich_vu._gia:,}đ)")
@@ -763,9 +775,9 @@ class MenuManager:
             print(f"📝 Lý do: {ly_do}")
             print(f"👨‍⚕️ Bác sĩ: {bac_si.ho_ten if ma_bs and 'bac_si' in locals() else 'Tự động gán'}")
             
-            confirm = input("\n✅ Xác nhận đăng ký? (y/n): ").strip().lower()
-            if confirm == 'y':
-                # Use username as CCCD for registration
+            xac_nhan = input("\n✅ Xác nhận đăng ký? (y/n): ").strip().lower()
+            if xac_nhan == 'y':
+                # Lấy thông tin cccd từ mã tài khoản
                 self.controller.tiep_nhan_cho_user(self.username, ma_dv, ma_pk, ly_do, ma_bs)
             else:
                 error("Đã hủy đăng ký khám bệnh.")
@@ -773,10 +785,10 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi đăng ký khám: {e}")
 
-    # =============== USER MANAGEMENT METHODS ===============
+    # =============== Quản lý danh sách tài khoản ===============
 
     def list_users(self):
-        """List all users with enhanced formatting"""
+        """Danh sách người dùng"""
         try:
             from db import get_conn
             conn = get_conn()
@@ -793,7 +805,6 @@ class MenuManager:
                 for i, user in enumerate(users, 1):
                     created_date = user.created_at.strftime("%d/%m/%Y %H:%M") if user.created_at else "N/A"
                     password = getattr(user, 'pass', 'N/A')
-                    # Mask password for security
                     masked_password = '*' * len(password) if password != 'N/A' else 'N/A'
                     print(f"{i:<4} {user.username:<20} {user.role:<8} {masked_password:<12} {created_date:<20}")
                 print_separator(80,"=")
@@ -804,7 +815,7 @@ class MenuManager:
             error(f"Lỗi khi lấy danh sách người dùng: {e}")
 
     def create_user(self):
-        """Create new user"""
+        """Tạo tài khoản mới"""
         try:
             username = input("Tên đăng nhập: ").strip()
             password = input("Mật khẩu: ").strip()
@@ -835,7 +846,7 @@ class MenuManager:
             error(f"Lỗi khi tạo tài khoản: {e}")
 
     def change_password(self):
-        """Change user password"""
+        """Đổi mật khẩu người dùng"""
         try:
             username = input("Tên đăng nhập: ").strip()
             new_password = input("Mật khẩu mới: ").strip()
@@ -858,7 +869,7 @@ class MenuManager:
             error(f"Lỗi khi thay đổi mật khẩu: {e}")
 
     def change_role(self):
-        """Change user role"""
+        """Đổi quyền người dùng"""
         try:
             username = input("Tên đăng nhập: ").strip()
             new_role = input("Quyền mới (ADMIN/USER): ").strip().upper()
@@ -885,15 +896,15 @@ class MenuManager:
             error(f"Lỗi khi thay đổi quyền: {e}")
 
     def delete_user(self):
-        """Delete user"""
+        """Xóa tài khoản người dùng"""
         try:
             username = input("Tên đăng nhập cần xóa: ").strip()
             if not username:
                 error("Tên đăng nhập không được để trống!")
                 return
                 
-            confirm = input(f"Bạn có chắc muốn xóa tài khoản '{username}'? (y/n): ").strip().lower()
-            if confirm != 'y':
+            xac_nhan = input(f"Bạn có chắc muốn xóa tài khoản '{username}'? (y/n): ").strip().lower()
+            if xac_nhan != 'y':
                 error("Đã hủy thao tác xóa")
                 return
             
@@ -910,10 +921,10 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xóa tài khoản: {e}")
 
-    # =============== ENHANCED EXCEL EXPORT METHODS ===============
+    # =============== Xuất Excel ===============
     
     def __init_report_manager(self):
-        """Initialize report manager"""
+        """khởi tạo ReportManager nếu chưa có"""
         if not hasattr(self, 'report_manager'):
             from utils.report_utils import ReportManager
             self.report_manager = ReportManager()
@@ -927,18 +938,18 @@ class MenuManager:
                 error("Không có dữ liệu bệnh nhân để xuất!")
                 return
             
-            # Initialize report manager
+            # khởi tạo report
             report_mgr = self.__init_report_manager()
             
-            # Format data using utility functions
+            # format dữ liệu
             from utils.report_utils import format_benh_nhan_data
             data = format_benh_nhan_data(benh_nhan_list)
             
-            # Generate filename and path
+            # Tạo  tên file và đường dẫn
             filename = report_mgr.generate_filename("DanhSach_BenhNhan", "xlsx")
             filepath = report_mgr.get_report_path("benh_nhan", filename)
             
-            # Create Excel with styling
+            # Tạo File Excel
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -965,18 +976,18 @@ class MenuManager:
                 error("Không có dữ liệu tiếp nhận để xuất!")
                 return
             
-            # Initialize report manager
+            # khởi tạo report
             report_mgr = self.__init_report_manager()
             
-            # Format data using utility functions
+            # format dữ liệu
             from utils.report_utils import format_tiep_nhan_data
             data = format_tiep_nhan_data(tiep_nhan_list)
             
-            # Generate filename and path
+            # Tạo  tên file và đường dẫn
             filename = report_mgr.generate_filename("DanhSach_TiepNhan", "xlsx")
             filepath = report_mgr.get_report_path("tiep_nhan", filename)
             
-            # Create Excel with styling
+            # Tạo File Excel
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -1003,18 +1014,18 @@ class MenuManager:
                 error("Không có dữ liệu dịch vụ để xuất!")
                 return
             
-            # Initialize report manager
+            # khởi tạo report
             report_mgr = self.__init_report_manager()
             
-            # Format data using utility functions
+            # format dữ liệu
             from utils.report_utils import format_dich_vu_data
             data = format_dich_vu_data(dich_vu_list)
             
-            # Generate filename and path
+            # Tạo  tên file và đường dẫn
             filename = report_mgr.generate_filename("BaoCao_DichVu", "xlsx")
             filepath = report_mgr.get_report_path("dich_vu", filename)
             
-            # Create Excel with styling
+            # Tạo File Excel
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -1041,18 +1052,18 @@ class MenuManager:
                 error("Không có dữ liệu phòng khám để xuất!")
                 return
             
-            # Initialize report manager
+            # khởi tạo report
             report_mgr = self.__init_report_manager()
             
-            # Format data using utility functions
+            # format dữ liệu
             from utils.report_utils import format_phong_kham_data
             data = format_phong_kham_data(phong_kham_list)
             
-            # Generate filename and path
+            # tạo tên file và đường dẫn
             filename = report_mgr.generate_filename("BaoCao_PhongKham", "xlsx")
             filepath = report_mgr.get_report_path("phong_kham", filename)
             
-            # Create Excel with styling
+            # tạo File Excel
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -1071,7 +1082,7 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xuất báo cáo phòng khám: {e}")
 
-    def export_summary_report(self):
+    def export_bao_cao_tong_hop(self):
         """Export comprehensive summary report with multiple sheets"""
         try:
             # Get all data
@@ -1134,14 +1145,12 @@ class MenuManager:
                 
         except Exception as e:
             error(f"Lỗi khi xuất báo cáo tổng hợp: {e}")
-
-    # =============== NEW STATISTICAL REPORTS ===============
     
-    def export_statistical_report(self):
+    def export_bao_cao_thong_ke(self):
         """Xuất báo cáo thống kê tổng hợp"""
         try:
             report_mgr = self.__init_report_manager()
-            result_path = report_mgr.export_statistical_report(
+            result_path = report_mgr.export_bao_cao_thong_ke(
                 self.controller.model, 
                 f"{self.user_role} - {self.username}"
             )
@@ -1155,11 +1164,11 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xuất báo cáo thống kê: {e}")
 
-    def export_revenue_report(self):
+    def export_bao_cao_doanh_thu(self):
         """xuất báo cáo doanh thu và phân tích doanh thu"""
         try:
             report_mgr = self.__init_report_manager()
-            result_path = report_mgr.export_revenue_report(
+            result_path = report_mgr.export_bao_cao_doanh_thu(
                 self.controller.model, 
                 f"{self.user_role} - {self.username}"
             )
@@ -1173,10 +1182,9 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xuất báo cáo doanh thu: {e}")
 
-    def export_bac_si_report(self):
+    def export_ds_bac_si(self):
         """Xuất báo cáo danh sách bác sĩ"""
         try:
-            # Get bác sĩ data
             try:
                 bac_si_list = self.controller.model.ds_bac_si()
             except:
@@ -1186,19 +1194,11 @@ class MenuManager:
             if not bac_si_list:
                 error("Không có dữ liệu bác sĩ để xuất!")
                 return
-            
-            # Initialize report manager
             report_mgr = self.__init_report_manager()
-            
-            # Format data using utility functions
             from utils.report_utils import format_bac_si_data
             data = format_bac_si_data(bac_si_list)
-            
-            # Generate filename and path
             filename = report_mgr.generate_filename("BaoCao_BacSi", "xlsx")
             filepath = report_mgr.get_report_path("phong_kham", filename)
-            
-            # Create Excel with styling
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -1217,18 +1217,17 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi xuất báo cáo bác sĩ: {e}")
 
-    def export_daily_report(self):
-        """Export daily activity report"""
+    def export_bao_cao_hang_ngay(self):
+        """xuất báo cáo hằng ngày - tiếp nhận trong ngày"""
         try:
             from datetime import date
             today = date.today()
             
-            # Filter today's tiếp nhận
+            # lấy danh sách tiếp nhận trong ngày
             tiep_nhan_list = self.controller.model.ds_tiep_nhan()
             today_tiep_nhan = []
             
             for tn in tiep_nhan_list:
-                # Giả sử có thuộc tính ngay_tao
                 if hasattr(tn, 'ngay_tao') and tn.ngay_tao:
                     tn_date = tn.ngay_tao.date() if hasattr(tn.ngay_tao, 'date') else tn.ngay_tao
                     if tn_date == today:
@@ -1237,22 +1236,21 @@ class MenuManager:
             if not today_tiep_nhan:
                 error(f"Không có dữ liệu tiếp nhận ngày {today.strftime('%d/%m/%Y')}!")
                 return
-            
-            # Initialize report manager
+            # Khởi tạo report
             report_mgr = self.__init_report_manager()
             
-            # Format data
+            # format dữ liệu
             from utils.report_utils import format_tiep_nhan_data
             data = format_tiep_nhan_data(today_tiep_nhan)
             
-            # Generate filename and path
+            # Tạo  tên file và đường dẫn
             filename = report_mgr.generate_filename(
                 "BaoCao_NgayHienTai", "xlsx", 
                 suffix=today.strftime('%Y%m%d')
             )
             filepath = report_mgr.get_report_path("thong_ke", filename)
             
-            # Create Excel with styling
+            # Tạo File Excel
             result_path = report_mgr.create_excel_with_styling(
                 data, 
                 filepath,
@@ -1272,9 +1270,9 @@ class MenuManager:
             error(f"Lỗi khi xuất báo cáo ngày: {e}")
 
 
-    # ===== BÁC SĨ MANAGEMENT METHODS =====
-    def add_bac_si(self):
-        """Add new bac si"""
+    # ===== QUẢN LÝ BÁC SĨ  =====
+    def them_bac_si(self):
+        """Thêm bác sĩ mới"""
         try:
             ma_bs = input("Mã bác sĩ: ").strip()
             ho_ten = input("Họ tên bác sĩ: ").strip()
@@ -1291,24 +1289,24 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi thêm bác sĩ: {e}")
 
-    def delete_bac_si(self):
-        """Delete bac si"""
+    def xoa_bac_si(self):
+        """Xóa bác sĩ"""
         try:
             ma_bs = input("Nhập mã bác sĩ cần xóa: ").strip()
             if not ma_bs:
                 error("Mã bác sĩ không được để trống!")
                 return
             
-            confirm = input(f"Bạn có chắc chắn muốn xóa bác sĩ {ma_bs}? (y/n): ").strip().lower()
-            if confirm == 'y':
+            xac_nhan = input(f"Bạn có chắc chắn muốn xóa bác sĩ {ma_bs}? (y/n): ").strip().lower()
+            if xac_nhan == 'y':
                 self.controller.xoa_bac_si(ma_bs)
             else:
                 error("Đã hủy thao tác xóa.")
         except Exception as e:
             error(f"Lỗi khi xóa bác sĩ: {e}")
 
-    def assign_bac_si_to_phong_kham(self):
-        """Assign bac si to phong kham"""
+    def phan_cong_bac_si_vao_phong_kham(self):
+        """Phân công bác sĩ vào phòng khám"""
         try:
             print("📋 Danh sách bác sĩ hiện tại:")
             self.controller.hien_thi_danh_sach_bac_si_cho_user()
@@ -1327,7 +1325,7 @@ class MenuManager:
             error(f"Lỗi khi gán bác sĩ vào phòng khám: {e}")
 
     def ds_bac_si_by_phong_kham(self):
-        """List bac si by phong kham"""
+        """Danh sách bác sĩ theo phòng khám"""
         try:
             print("📋 Danh sách phòng khám:")
             phong_kham_list = self.controller.model.ds_phong_kham()
@@ -1357,13 +1355,13 @@ class MenuManager:
         except Exception as e:
             error(f"Lỗi khi liệt kê bác sĩ theo phòng khám: {e}")
 
-    def migration_menu(self):
-        """Migration dữ liệu tỉnh bệnh nhân theo NQ 202/2025/QH15"""
+    def menu_cap_nhat_du_lieu(self):
+        """Cập nhật dữ liệu tỉnh sát nhập -  Thông tin bệnh nhân theo NQ 202/2025/QH15"""
         try:
-            from migration_hanh_chinh import run_full_migration, check_migration_status
+            from cap_nhat_don_vi_hanh_chinh import cap_nhat_tatca, kiemtra_trangthai_capnhat
             
             print("\n" + "="*60)
-            print("🏛️  MIGRATION DỮ LIỆU TỈNH BỆNH NHÂN (NQ 202/2025/QH15)")
+            print("🏛️  CẬP NHẬT DỮ LIỆU TỈNH SÁT NHẬP - THÔNG TIN BỆNH NHÂN (NQ 202/2025/QH15)")
             print_separator(60,"=")
             print("📋 Chức năng này sẽ:")
             print("   • Tạo các bảng hành chính mới theo NQ 202/2025/QH15")
@@ -1371,17 +1369,17 @@ class MenuManager:
             print("   • Cập nhật thông tin tỉnh của tất cả bệnh nhân")
             print_separator(60,"=")
             
-            check_migration_status()
+            kiemtra_trangthai_capnhat()
             
             print("\n" + "⚠️ " + "="*58)
             print("  CẢNH BÁO: Thao tác này sẽ thay đổi cấu trúc database!")
             print("  Nên backup database trước khi thực hiện migration!")
             print_separator(60,"=")
             
-            confirm = input("Bạn có chắc chắn muốn thực hiện migration? (y/n): ").strip().lower()
+            xac_nhan = input("Bạn có chắc chắn muốn thực hiện migration? (y/n): ").strip().lower()
             
-            if confirm == 'y':
-                success = run_full_migration()
+            if xac_nhan == 'y':
+                success = cap_nhat_tatca()
                 if success:
                     print("\n✅ Migration hoàn thành thành công!")
                     print("💡 Từ giờ hệ thống sẽ sử dụng cấu trúc hành chính mới")
@@ -1416,7 +1414,7 @@ def main():
 
     print(f"👋 Xin chào {'Quản trị viên' if user._role == 'ADMIN' else f'Bệnh nhân {username}'}! Quyền: {user._role}")
     
-    # Initialize menu manager and start
+    # khởi tạo menu
     menu_manager = MenuManager(controller, user._user_id, user._role, username)
     menu_manager.main_menu()
 

@@ -89,7 +89,7 @@ def validate_birth_date_format(ngay_sinh: str) -> Tuple[bool, str, str]:
             "  - YYYY (ví dụ: 1986)"
         ), ""
 
-def display_patient_confirmation_info(ho_ten: str, gioi_tinh: str, ngay_sinh: str, so_cccd: str) -> None:
+def Hien_thi_thong_tin_xac_nhan_benhnhan(ho_ten: str, gioi_tinh: str, ngay_sinh: str, so_cccd: str) -> None:
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN VỪA TạO")
     print_separator(60,"=")
@@ -112,7 +112,7 @@ def display_patient_confirmation_info(ho_ten: str, gioi_tinh: str, ngay_sinh: st
     
     print_separator(60,"=")
 
-def input_cccd_with_validation() -> str:
+def nhap_thong_tin_cccd() -> str:
     while True:
         cccd = input("Số CCCD (12 chữ số): ").strip()
         is_valid, error_msg = validate_cccd_format(cccd)
@@ -123,7 +123,7 @@ def input_cccd_with_validation() -> str:
             error(error_msg)
             print("Vui lòng nhập lại!")
 
-def input_birth_date_with_validation() -> str:
+def nhap_thong_tin_ngaysinh() -> str:
     print("\nCác định dạng ngày sinh được hỗ trợ:")
     print("  - DD/MM/YYYY (ví dụ: 15/07/1986)")
     print("  - DD-MM-YYYY (ví dụ: 15-07-1986)")
@@ -140,13 +140,13 @@ def input_birth_date_with_validation() -> str:
             error(error_msg)
             print("Vui lòng nhập lại!")
 
-def input_gender_with_recommendation(cccd: str) -> str:
+def nhap_thong_tin_gioitinh(cccd: str) -> str:
     _, gender_cccd, _, _ = phantich_cccd(cccd)
     
     if gender_cccd:
         print(f"💡 Hệ thống phân tích từ CCCD: Giới tính = {gender_cccd}")
-        confirm = input(f"Xác nhận giới tính là '{gender_cccd}'? (y/n): ").strip().lower()
-        if not confirm or confirm in ['y', 'yes']:
+        xac_nhan = input(f"Xác nhận giới tính là '{gender_cccd}'? (y/n): ").strip().lower()
+        if not xac_nhan or xac_nhan in ['y', 'yes']:
             return gender_cccd
     
     while True:
@@ -157,7 +157,7 @@ def input_gender_with_recommendation(cccd: str) -> str:
             error("Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
             print("Vui lòng nhập lại!")
 
-def input_province_with_recommendation(cccd: str) -> str:
+def nhap_thong_tin_diachi_tinh(cccd: str) -> str:
     province_old, _, _, province_new = phantich_cccd(cccd)
     recommended_province = province_new if province_new else province_old
     
@@ -166,8 +166,8 @@ def input_province_with_recommendation(cccd: str) -> str:
         if province_old and province_new and province_old != province_new:
             print(f"   (Cũ: {province_old} → Mới: {province_new})")
         
-        confirm = input(f"Xác nhận tỉnh/TP là '{recommended_province}'? (y/n): ").strip().lower()
-        if not confirm or confirm in ['y', 'yes']:
+        xac_nhan = input(f"Xác nhận tỉnh/TP là '{recommended_province}'? (y/n): ").strip().lower()
+        if not xac_nhan or xac_nhan in ['y', 'yes']:
             return recommended_province
     
     while True:
@@ -187,19 +187,19 @@ def input_gender_with_validation() -> str:
             error("Giới tính phải là 'Nam', 'Nữ' hoặc 'Khác'!")
             print("Vui lòng nhập lại!")
 
-def display_existing_patient_info(patient) -> None:
+def Hien_thi_thong_tin_benhnhan(benh_nhan) -> None:
     print("\n" + "="*60)
     print("           THÔNG TIN BỆNH NHÂN ĐÃ TỒN TẠI")
     print_separator(60,"=")
     
-    print(f"📱 CCCD: {patient.so_cccd}")
-    print(f"🆔 Mã BN: {patient.ma_bn}")
-    print(f"📋 PID: {patient.pid}")
-    print(f"👤 Họ tên: {patient._ho_ten}")
-    print(f"⚤ Giới tính: {patient._gioi_tinh}")
-    print(f"🎂 Năm sinh: {patient.nam_sinh}")
+    print(f"📱 CCCD: {benh_nhan.so_cccd}")
+    print(f"🆔 Mã BN: {benh_nhan.ma_bn}")
+    print(f"📋 PID: {benh_nhan.pid}")
+    print(f"👤 Họ tên: {benh_nhan._ho_ten}")
+    print(f"⚤ Giới tính: {benh_nhan._gioi_tinh}")
+    print(f"🎂 Năm sinh: {benh_nhan.nam_sinh}")
 
-def input_full_name_with_validation() -> str:
+def nhap_thong_tin_hoten() -> str:
     while True:
         ho_ten = input("Họ tên: ").strip()
         if ho_ten:
@@ -208,21 +208,21 @@ def input_full_name_with_validation() -> str:
             error("Họ tên không được để trống!")
             print("Vui lòng nhập lại!")
 
-def input_ward_commune_with_validation() -> str:
+def nhap_thong_tin_diachi_phuongxa() -> str:
     phuong_xa = input("Phường/Xã (có thể để trống): ").strip()
     return phuong_xa
 
-def display_patient_summary(patient) -> None:
+def display_benh_nhan_summary(benh_nhan) -> None:
     print("\n" + "="*50)
     print("         THÔNG TIN BỆNH NHÂN")
     print_separator(50,"=")
     
-    print(f"🆔 Mã BN: {patient.ma_bn}")
-    print(f"📋 PID: {patient.pid}")
-    print(f"👤 Họ tên: {patient._ho_ten}")
-    print(f"⚤ Giới tính: {patient._gioi_tinh}")
-    print(f"🎂 Năm sinh: {patient.nam_sinh}")
-    print(f"📱 CCCD: {patient.so_cccd}")
+    print(f"🆔 Mã BN: {benh_nhan.ma_bn}")
+    print(f"📋 PID: {benh_nhan.pid}")
+    print(f"👤 Họ tên: {benh_nhan._ho_ten}")
+    print(f"⚤ Giới tính: {benh_nhan._gioi_tinh}")
+    print(f"🎂 Năm sinh: {benh_nhan.nam_sinh}")
+    print(f"📱 CCCD: {benh_nhan.so_cccd}")
     print_separator(50,"=")
 
 def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
@@ -271,7 +271,7 @@ def display_reception_summary(tiep_nhan, chi_phi: int) -> None:
     
     print_separator(60,"=")
 
-def confirm_with_default_yes(message: str) -> bool:
+def xac_nhan_thong_tin(message: str) -> bool:
     response = input(f"{message} (y/n): ").strip().lower()
     return not response or response in ['y', 'yes']
 

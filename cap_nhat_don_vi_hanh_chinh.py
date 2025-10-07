@@ -78,18 +78,18 @@ def CapNhat_BenhNhan_DonviHanhChinh():
     print("🔄 Bắt đầu cập nhật thông tin tỉnh - bệnh nhân...")
     
     cur.execute("SELECT BN_ID, Tinh FROM BenhNhan WHERE Tinh IS NOT NULL AND Tinh != ''")
-    patients = cur.fetchall()
+    benh_nhans = cur.fetchall()
     
     SoLuong_CapNhat = 0
     SoLuong_KhongThayDoi = 0
     SoLuong_Loi = 0
     
-    print(f"📊 Tìm thấy {len(patients)} bệnh nhân có thông tin tỉnh")
+    print(f"📊 Tìm thấy {len(benh_nhans)} bệnh nhân có thông tin tỉnh")
     
-    for patient in patients:
+    for benh_nhan in benh_nhans:
         try:
-            bn_id = patient.BN_ID
-            don_vi_hanh_chinh_cu = patient.Tinh.strip()
+            bn_id = benh_nhan.BN_ID
+            don_vi_hanh_chinh_cu = benh_nhan.Tinh.strip()
             
             don_vi_hanh_chinh_moi = lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu)
             

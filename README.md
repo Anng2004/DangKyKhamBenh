@@ -144,7 +144,7 @@ conn_str = (- 💾 **CSV fallback** khi không có pandas
 
   5. 👨‍⚕️ Quản lý Bác sĩ
 
-  6. 👤 Quản lý Người dùng**Trên Linux/macOS:**
+  6. 👤 Quản lý Tài khoản**Trên Linux/macOS:**
 
   7. 📊 Báo cáo & Xuất Excel```bash
 
@@ -414,7 +414,7 @@ MIT License - Professional healthcare management system.### �‍💼 Admin Rol
 
 *Sẵn sàng triển khai! 🚀*  4. 👳 Quản lý Bệnh nhân
   5. 👨‍⚕️ Quản lý Bác sĩ
-  6. 👤 Quản lý Người dùng
+  6. 👤 Quản lý Tài khoản
   7. 📊 Báo cáo & Xuất Excel
   8. 🏛️ Migration dữ liệu tỉnh bệnh nhân
   0. 🚪 Đăng xuất
@@ -527,8 +527,8 @@ cli_khambenh/
 ├── 🎯 Features  
 │   ├── qr_utils.py         # QR code processing + CCCD analysis
 │   ├── report_utils.py     # 🆕 Professional reporting system
-│   ├── migration_hanh_chinh.py # Admin data migration
-│   └── admin_migration_menu.py # Migration UI
+│   ├── cap_nhat_don_vi_hanh_chinh.py # Admin data migration
+│   └── admin_menu_cap_nhat_du_lieu.py # Migration UI
 │
 ├── 📊 Data & Config
 │   ├── database_schema.sql # Complete DB schema
@@ -687,7 +687,7 @@ MIT License - Xem file LICENSE để biết thêm chi tiết.
 - **Setup Guide**: `README_SETUP.md` (detailed installation)
 - **Database Schema**: `database_schema.sql`
 - **Sample Data**: `import_data.py`  
-- **Migration Tools**: `migration_hanh_chinh.py`
+- **Migration Tools**: `cap_nhat_don_vi_hanh_chinh.py`
 
 ---
 
@@ -726,9 +726,9 @@ MIT License - Xem file LICENSE để biết thêm chi tiết.
 *Ready for production use! 🚀*
 
 ### 🎯 Key Highlights:
-- ✅ **Dual-role system**: Comprehensive admin tools + Enhanced patient portal
+- ✅ **Dual-role system**: Comprehensive admin tools + Enhanced benh_nhan portal
 - ✅ **Smart medical history**: Advanced viewing, searching, and statistics
 - ✅ **Professional reporting**: 11 types of Excel reports with styling
-- ✅ **QR code intelligence**: Automatic patient data extraction
+- ✅ **QR code intelligence**: Automatic benh_nhan data extraction
 - ✅ **User-friendly interface**: Intuitive menus with emoji and formatting
 - ✅ **Production-ready**: Comprehensive error handling and validation

@@ -66,47 +66,43 @@ class ReportManager:
                 bottom=Side(style='thin')
             )
             
-            current_row = 1
+            so_dong_hien_tai = 1
             if title:
-                ws.merge_cells(f"A{current_row}:Z{current_row}")
-                title_cell = ws[f"A{current_row}"]
+                ws.merge_cells(f"A{so_dong_hien_tai}:Z{so_dong_hien_tai}")
+                title_cell = ws[f"A{so_dong_hien_tai}"]
                 title_cell.value = title
                 title_cell.font = Font(bold=True, size=16)
                 title_cell.alignment = Alignment(horizontal="center")
-                current_row += 2
+                so_dong_hien_tai += 2
             
             if author:
-                ws[f"A{current_row}"] = f"Người xuất: {author}"
-                current_row += 1
+                ws[f"A{so_dong_hien_tai}"] = f"Người xuất: {author}"
+                so_dong_hien_tai += 1
             
-            ws[f"A{current_row}"] = f"Thời gian xuất: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-            current_row += 2
+            ws[f"A{so_dong_hien_tai}"] = f"Thời gian xuất: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+            so_dong_hien_tai += 2
             
             if data:
-                # Headers
                 headers = list(data[0].keys())
                 for col_idx, header in enumerate(headers, 1):
-                    cell = ws.cell(row=current_row, column=col_idx)
+                    cell = ws.cell(row=so_dong_hien_tai, column=col_idx)
                     cell.value = header
                     cell.font = header_font
                     cell.fill = header_fill
                     cell.alignment = header_alignment
                     cell.border = thin_border
                 
-                current_row += 1
+                so_dong_hien_tai += 1
                 
-                # Data rows
                 for row_data in data:
                     for col_idx, header in enumerate(headers, 1):
-                        cell = ws.cell(row=current_row, column=col_idx)
+                        cell = ws.cell(row=so_dong_hien_tai, column=col_idx)
                         cell.value = row_data.get(header, "")
                         cell.border = thin_border
-                        # Alignment cho số
                         if isinstance(cell.value, (int, float)):
                             cell.alignment = Alignment(horizontal="right")
-                    current_row += 1
+                    so_dong_hien_tai += 1
                 
-                # Auto-fit columns
                 for col_idx, column in enumerate(ws.columns, 1):
                     max_length = 0
                     column_letter = openpyxl.utils.get_column_letter(col_idx)
@@ -247,7 +243,7 @@ class ReportManager:
             error(f"Lỗi khi lấy thống kê: {e}")
             return {}
 
-    def export_statistical_report(self, model, author: str = "System") -> str:
+    def export_bao_cao_thong_ke(self, model, author: str = "System") -> str:
         """Xuất báo cáo thống kê tổng hợp"""
         try:
             stats = self.get_statistics_summary(model)
@@ -316,7 +312,7 @@ class ReportManager:
             error(f"Lỗi khi xuất báo cáo thống kê: {e}")
             return ""
 
-    def export_revenue_report(self, model, author: str = "System") -> str:
+    def export_bao_cao_doanh_thu(self, model, author: str = "System") -> str:
         try:
             tiep_nhan_list = model.ds_tiep_nhan()
             
@@ -328,11 +324,11 @@ class ReportManager:
                 if hasattr(tn, '_dv') and tn._dv and hasattr(tn._dv, '_gia'):
                     service_name = getattr(tn._dv, '_ten_dv', 'Unknown')
                     service_price = getattr(tn._dv, '_gia', 0)
-                    patient_name = getattr(getattr(tn, '_bn', None), '_ho_ten', '') if hasattr(tn, '_bn') else ''
+                    benh_nhan_name = getattr(getattr(tn, '_bn', None), '_ho_ten', '') if hasattr(tn, '_bn') else ''
                     
                     revenue_data.append({
                         'Mã TN': getattr(tn, '_ma_tn', ''),
-                        'Bệnh nhân': patient_name,
+                        'Bệnh nhân': benh_nhan_name,
                         'Dịch vụ': service_name,
                         'Giá (VNĐ)': service_price,
                         'Định dạng giá': f"{service_price:,}"

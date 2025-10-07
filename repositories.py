@@ -251,7 +251,7 @@ class BenhNhanRepo:
         tinh: str = "",
         nam_sinh: int = None
     ) -> str:
-        """Create patient with full address information"""
+        """Create benh_nhan with full address information"""
         conn = get_conn(); cur = conn.cursor()
 
         # Tạo PID
@@ -290,7 +290,7 @@ class BenhNhanRepo:
         so_cmnd: str,
         dia_chi: str
     ) -> str:
-        """Create patient from QR code data with full address"""
+        """Create benh_nhan from QR code data with full address"""
         conn = get_conn(); cur = conn.cursor()
 
         # Tạo PID
@@ -341,7 +341,7 @@ class BenhNhanRepo:
         return None
 
     def exists_by_cccd(self, so_cccd: str) -> bool:
-        """Check if patient with given CCCD already exists"""
+        """Check if benh_nhan with given CCCD already exists"""
         conn = get_conn(); cur = conn.cursor()
         cur.execute("SELECT COUNT(*) as count FROM BenhNhan WHERE SoCCCD = ?", (so_cccd,))
         r = cur.fetchone(); conn.close()

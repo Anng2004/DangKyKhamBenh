@@ -2,7 +2,7 @@
 from typing import List, Optional
 from models import BenhNhan, PhongKham, DichVu, TiepNhan, BacSi, ChiPhiKham
 from repositories import BenhNhanRepo, PhongKhamRepo, DichVuRepo, TiepNhanRepo, BacSiRepo
-from utils.qr_utils import parse_qr_code, display_patient_info, generate_username_from_qr, generate_password_from_qr, QRPatientInfo
+from utils.qr_utils import parse_qr_code, display_benh_nhan_info, generate_username_from_qr, generate_password_from_qr, QRbenh_nhanInfo
 
 class View:
     @classmethod
@@ -473,17 +473,17 @@ class Controller:
             self.view.print_message("❌ QR code không hợp lệ!")
             return None
         
-        display_patient_info(qr_info)
+        display_benh_nhan_info(qr_info)
         
         # kiểm tra bệnh nhân đã tồn tại
-        existing_patient = self.model.bn_repo.get_by_cccd(qr_info.cccd)
-        if existing_patient:
+        existing_benh_nhan = self.model.bn_repo.get_by_cccd(qr_info.cccd)
+        if existing_benh_nhan:
             print(f"\n⚠️  Bệnh nhân đã tồn tại trong hệ thống:")
-            print(f"   Mã BN: {existing_patient.ma_bn}")
-            print(f"   Họ tên: {existing_patient._ho_ten}")
-            confirm = input("\nBạn có muốn sử dụng bệnh nhân này? (y/n): ").strip().lower()
-            if confirm == 'y':
-                return existing_patient
+            print(f"   Mã BN: {existing_benh_nhan.ma_bn}")
+            print(f"   Họ tên: {existing_benh_nhan._ho_ten}")
+            xac_nhan = input("\nBạn có muốn sử dụng bệnh nhân này? (y/n): ").strip().lower()
+            if xac_nhan == 'y':
+                return existing_benh_nhan
             else:
                 return None
         
@@ -492,8 +492,8 @@ class Controller:
         print(f"   👤 Username: {qr_info.cccd}")
         print(f"   🔒 Password: {qr_info.ngay_sinh}")
         
-        confirm = input("\n✅ Xác nhận tạo bệnh nhân mới? (y/n): ").strip().lower()
-        if confirm != 'y':
+        xac_nhan = input("\n✅ Xác nhận tạo bệnh nhân mới? (y/n): ").strip().lower()
+        if xac_nhan != 'y':
             self.view.print_message("❌ Đã hủy tạo bệnh nhân.")
             return None
         

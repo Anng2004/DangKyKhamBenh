@@ -37,7 +37,7 @@ def print_result_summary(title: str, items: list, prefix: str = "📊") -> None:
     for label, value in items:
         print(f"   • {label}: {value}")
 
-def confirm_action(message: str, default: bool = False) -> bool:
+def xac_nhan_action(message: str, default: bool = False) -> bool:
     default_text = "(y/n)" if default else "(y/n)"
     response = input(f"❓ {message} {default_text}: ").strip().lower()
     
