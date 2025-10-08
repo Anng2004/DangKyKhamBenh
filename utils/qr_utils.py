@@ -89,13 +89,13 @@ def lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu: str) -> str:
         'Thừa Thiên Huế': 'Thành phố Huế'
     }
     
-    mapped_name = ten_day_du.get(don_vi_hanh_chinh_cu, don_vi_hanh_chinh_cu)
-    if mapped_name in THONG_TIN_SAT_NHAP['giu_nguyen']:
-        return mapped_name
+    map_ten = ten_day_du.get(don_vi_hanh_chinh_cu, don_vi_hanh_chinh_cu)
+    if map_ten in THONG_TIN_SAT_NHAP['giu_nguyen']:
+        return map_ten
     
     # Tìm trong danh sách sáp nhập
     for sat_nhap in THONG_TIN_SAT_NHAP['sat_nhap']:
-        if mapped_name in sat_nhap['don_vi_truoc_sat_nhap']:
+        if map_ten in sat_nhap['don_vi_truoc_sat_nhap']:
             return sat_nhap['Don_vi_moi']
         # Kiểm tra các biến thể tên
         for include in sat_nhap['don_vi_truoc_sat_nhap']:
