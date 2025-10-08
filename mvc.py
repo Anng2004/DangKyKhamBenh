@@ -1,6 +1,6 @@
 
 from typing import List, Optional
-from models import BenhNhan, PhongKham, DichVu, TiepNhan, BacSi, ChiPhiKham
+from models import AbcBenhNhan, AbcPhongKham, AbcDichVu, AbcTiepNhan, AbcBacSi, ChiPhiKham
 from repositories import BenhNhanRepo, PhongKhamRepo, DichVuRepo, TiepNhanRepo, BacSiRepo
 from utils.qr_utils import parse_qr_code, display_benh_nhan_info, generate_username_from_qr, generate_password_from_qr, QRbenh_nhanInfo
 
@@ -23,22 +23,22 @@ class Model:
         self.bs_repo = BacSiRepo()
 
     # Thông tin danh sách bệnh nhân, phòng khám, dịch vụ, tiếp nhận, bác sĩ
-    def ds_benh_nhan(self) -> List[BenhNhan]:
+    def ds_benh_nhan(self) -> List[AbcBenhNhan]:
         return self.bn_repo.list_all()
 
-    def ds_phong_kham(self) -> List[PhongKham]:
+    def ds_phong_kham(self) -> List[AbcPhongKham]:
         return self.pk_repo.list_all()
 
-    def ds_dich_vu(self) -> List[DichVu]:
+    def ds_dich_vu(self) -> List[AbcDichVu]:
         return self.dv_repo.list_all()
 
-    def ds_tiep_nhan(self) -> List[TiepNhan]:
+    def ds_tiep_nhan(self) -> List[AbcTiepNhan]:
         return self.tn_repo.list_all()
 
-    def ds_tiep_nhan_theo_user(self, username: str) -> List[TiepNhan]:
+    def ds_tiep_nhan_theo_user(self, username: str) -> List[AbcTiepNhan]:
         return self.tn_repo.list_by_user(username)
 
-    def ds_bac_si(self) -> List[BacSi]:
+    def ds_bac_si(self) -> List[AbcBacSi]:
         return self.bs_repo.list_all()
 
 
@@ -56,29 +56,29 @@ class Controller:
     ) -> None:
         from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gioitinh_cccd, nam_sinh_cccd, province_new = phantich_cccd(so_cccd)
+        tinh_cu, gioitinh_cccd, nam_sinh_cccd, tinh_moi = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
         except:
             input_year = None
         
-        final_nam_sinh = nam_sinh_cccd if nam_sinh_cccd else input_year
+        nam_sinh_hieuluc = nam_sinh_cccd if nam_sinh_cccd else input_year
         
-        final_province = province_new if province_new else province_old
+        tinh_hientai = tinh_moi if tinh_moi else tinh_cu
         
         if nam_sinh_cccd and nam_sinh_cccd != input_year:
             self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {nam_sinh_cccd} (thay vì {input_year})")
         
-        if final_province:
-            self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {final_province}")
+        if tinh_hientai:
+            self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {tinh_hientai}")
         
         if gioitinh_cccd and gioitinh_cccd != gioi_tinh:
             self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gioitinh_cccd})")
         
         bn_id = self.model.bn_repo.create_enhanced(
             ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
-            final_nam_sinh, final_province
+            nam_sinh_hieuluc, tinh_hientai
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
         
@@ -93,29 +93,29 @@ class Controller:
     ) -> None:
         from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gioitinh_cccd, nam_sinh_cccd, province_new = phantich_cccd(so_cccd)
+        tinh_cu, gioitinh_cccd, nam_sinh_cccd, tinh_moi = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
         except:
             input_year = None
         
-        final_nam_sinh = nam_sinh_cccd if nam_sinh_cccd else input_year
+        nam_sinh_hieuluc = nam_sinh_cccd if nam_sinh_cccd else input_year
         
-        final_province = tinh if tinh else (province_new if province_new else province_old)
+        tinh_hientai = tinh if tinh else (tinh_moi if tinh_moi else tinh_cu)
         
         if nam_sinh_cccd and nam_sinh_cccd != input_year:
             self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {nam_sinh_cccd} (thay vì {input_year})")
         
-        if not tinh and final_province:
-            self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {final_province}")
+        if not tinh and tinh_hientai:
+            self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {tinh_hientai}")
         
         if gioitinh_cccd and gioitinh_cccd != gioi_tinh:
             self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gioitinh_cccd})")
         
         bn_id = self.model.bn_repo.create_with_address(
             ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
-            phuong_xa, final_province, final_nam_sinh
+            phuong_xa, tinh_hientai, nam_sinh_hieuluc
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
 
@@ -128,7 +128,7 @@ class Controller:
             
             self.in_thong_tin_tiep_nhan(tiep_nhan, chi_phi)
 
-    def in_thong_tin_tiep_nhan(self, tiep_nhan: 'TiepNhan', chi_phi: int) -> None:
+    def in_thong_tin_tiep_nhan(self, tiep_nhan: 'AbcTiepNhan', chi_phi: int) -> None:
         self.view.print_message("\n" + "="*60)
         self.view.print_message("📋 THÔNG TIN TIẾP NHẬN")
         self.view.print_message("="*60)
@@ -312,7 +312,7 @@ class Controller:
             except:
                 pass
     
-    def _hien_thi_chi_tiet_tiep_nhan(self, tn: 'TiepNhan'):
+    def _hien_thi_chi_tiet_tiep_nhan(self, tn: 'AbcTiepNhan'):
         """Hiển thị chi tiết một lần tiếp nhận"""
         self.view.print_message(f"\n🔍 CHI TIẾT LỊCH SỬ KHÁM")
         self.view.print_message("="*60)
@@ -467,7 +467,7 @@ class Controller:
         else:
             self.view.print_message("Có lỗi xảy ra khi gán bác sĩ vào phòng khám.")
 
-    def process_qr_scan(self, qr_string: str) -> Optional[BenhNhan]:
+    def process_qr_scan(self, qr_string: str) -> Optional[AbcBenhNhan]:
         qr_info = parse_qr_code(qr_string)
         if not qr_info:
             self.view.print_message("❌ QR code không hợp lệ!")

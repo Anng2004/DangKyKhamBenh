@@ -158,13 +158,13 @@ def nhap_thong_tin_gioitinh(cccd: str) -> str:
             print("Vui lòng nhập lại!")
 
 def nhap_thong_tin_diachi_tinh(cccd: str) -> str:
-    province_old, _, _, province_new = phantich_cccd(cccd)
-    recommended_province = province_new if province_new else province_old
+    tinh_cu, _, _, tinh_moi = phantich_cccd(cccd)
+    recommended_province = tinh_moi if tinh_moi else tinh_cu
     
     if recommended_province:
         print(f"💡 Hệ thống phân tích từ CCCD: Tỉnh/TP = {recommended_province}")
-        if province_old and province_new and province_old != province_new:
-            print(f"   (Cũ: {province_old} → Mới: {province_new})")
+        if tinh_cu and tinh_moi and tinh_cu != tinh_moi:
+            print(f"   (Cũ: {tinh_cu} → Mới: {tinh_moi})")
         
         xac_nhan = input(f"Xác nhận tỉnh/TP là '{recommended_province}'? (y/n): ").strip().lower()
         if not xac_nhan or xac_nhan in ['y', 'yes']:

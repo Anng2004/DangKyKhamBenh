@@ -116,7 +116,7 @@ def phantich_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int
         cccd: Số CCCD 12 chữ số (VD: 079215000001)
     
     Returns:
-        Tuple[province_old, gioitinh, nam_sinh, province_new] hoặc (None, None, None, None) nếu không hợp lệ
+        Tuple[tinh_cu, gioitinh, nam_sinh, tinh_moi] hoặc (None, None, None, None) nếu không hợp lệ
     """
     if not cccd or len(cccd) != 12 or not cccd.isdigit():
         return None, None, None, None
@@ -272,7 +272,7 @@ def parse_qr_code(qr_string: str) -> Optional[QRbenh_nhanInfo]:
             error("Họ tên không được để trống")
             return None
         
-        extracted_province_old, extracted_gioitinh, extracted_year, extracted_province_new = phantich_cccd(cccd)
+        extracted_tinh_cu, extracted_gioitinh, extracted_year, extracted_tinh_moi = phantich_cccd(cccd)
         
         if not gioi_tinh and extracted_gioitinh:
             gioi_tinh = extracted_gioitinh
@@ -282,12 +282,12 @@ def parse_qr_code(qr_string: str) -> Optional[QRbenh_nhanInfo]:
             ngay_sinh = str(extracted_year)
             success(f"Phân tích CCCD: Năm sinh = {extracted_year}")
         
-        if not dia_chi and extracted_province_new:
-            dia_chi = extracted_province_new
-            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_province_new} (mới)")
-        elif not dia_chi and extracted_province_old:
-            dia_chi = extracted_province_old
-            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_province_old} (cũ)")
+        if not dia_chi and extracted_tinh_moi:
+            dia_chi = extracted_tinh_moi
+            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_tinh_moi} (mới)")
+        elif not dia_chi and extracted_tinh_cu:
+            dia_chi = extracted_tinh_cu
+            success(f"Phân tích CCCD: Tỉnh/TP = {extracted_tinh_cu} (cũ)")
         
         if gioi_tinh and gioi_tinh not in ['Nam', 'Nữ']:
             error(f"Giới tính không hợp lệ: {gioi_tinh} (phải là 'Nam' hoặc 'Nữ')")
@@ -351,11 +351,11 @@ def display_benh_nhan_info(qr_info: QRbenh_nhanInfo) -> None:
     
     # Hiển thị thông tin phân tích từ CCCD
     print("\n📊 PHÂN TÍCH CCCD:")
-    province_old, gioitinh, nam_sinh, province_new = phantich_cccd(qr_info.cccd)
-    if province_old:
-        print(f"   🗺️  Nơi khai sinh (cũ): {province_old}")
-    if province_new:
-        print(f"   🗺️  Nơi khai sinh (mới): {province_new}")
+    tinh_cu, gioitinh, nam_sinh, tinh_moi = phantich_cccd(qr_info.cccd)
+    if tinh_cu:
+        print(f"   🗺️  Nơi khai sinh (cũ): {tinh_cu}")
+    if tinh_moi:
+        print(f"   🗺️  Nơi khai sinh (mới): {tinh_moi}")
     if gioitinh:
         print(f"   👫 Giới tính (theo CCCD): {gioitinh}")
     if nam_sinh:

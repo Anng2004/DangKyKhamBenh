@@ -5,7 +5,7 @@ from typing import Optional
 from utils.message_utils import error, success, warning, info
 
 # ===== Abstracts =====
-class AbsEntity(ABC):
+class TruuTuong(ABC):
     @abstractmethod
     def __str__(self) -> str:
         pass
@@ -15,7 +15,7 @@ class AbsEntity(ABC):
 
 
 # ===== Nghiệp vụ =====
-class User(AbsEntity):
+class AbcUser(TruuTuong):
     def __init__(self, user_id: str, username: str, role: str):
         self._user_id = user_id
         self._username = username
@@ -28,7 +28,7 @@ class User(AbsEntity):
     def user_id(self) -> str: return self._user_id
 
 
-class PhongKham(AbsEntity):
+class AbcPhongKham(TruuTuong):
     def __init__(self, pk_id: str, ma_phong: str, ten_phong: str, bac_si: Optional['BacSi'] = None):
         self._pk_id = pk_id
         self._ma_phong = ma_phong
@@ -54,7 +54,7 @@ class PhongKham(AbsEntity):
     def bac_si(self) -> Optional['BacSi']: return self._bac_si
 
 
-class DichVu(AbsEntity):
+class AbcDichVu(TruuTuong):
     def __init__(self, dv_id: str, ma_dv: str, ten_dv: str, gia: int):
         self._dv_id = dv_id
         self._ma_dv = ma_dv
@@ -74,7 +74,7 @@ class DichVu(AbsEntity):
     def gia(self) -> int: return self._gia
 
 
-class BacSi(AbsEntity):
+class AbcBacSi(TruuTuong):
     def __init__(self, bs_id: str, ma_bs: str, ho_ten: str, chuyen_khoa: str = "", so_dt: str = "", email: str = ""):
         self._bs_id = bs_id
         self._ma_bs = ma_bs
@@ -100,7 +100,7 @@ class BacSi(AbsEntity):
     def email(self) -> str: return self._email
 
 
-class BenhNhan(AbsEntity):
+class AbcBenhNhan(TruuTuong):
     def __init__(self, bn_id: str, ma_bn: str, pid: str, ho_ten: str, gioi_tinh: str, nam_sinh: int, so_cccd: str):
         self._bn_id = bn_id
         self._ma_bn = ma_bn
@@ -170,7 +170,7 @@ class BenhNhan(AbsEntity):
             return 0
 
 
-class TiepNhan(AbsEntity):
+class AbcTiepNhan(TruuTuong):
     def __init__(self, tn_id: str, ma_tn: str, bn: BenhNhan, ly_do: str, dv: DichVu, pk: PhongKham, bs: Optional[BacSi] = None, created_at: str = ""):
         self._tn_id = tn_id
         self._ma_tn = ma_tn
