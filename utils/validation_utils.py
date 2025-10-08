@@ -141,13 +141,13 @@ def nhap_thong_tin_ngaysinh() -> str:
             print("Vui lòng nhập lại!")
 
 def nhap_thong_tin_gioitinh(cccd: str) -> str:
-    _, gender_cccd, _, _ = phantich_cccd(cccd)
+    _, gioitinh_cccd, _, _ = phantich_cccd(cccd)
     
-    if gender_cccd:
-        print(f"💡 Hệ thống phân tích từ CCCD: Giới tính = {gender_cccd}")
-        xac_nhan = input(f"Xác nhận giới tính là '{gender_cccd}'? (y/n): ").strip().lower()
+    if gioitinh_cccd:
+        print(f"💡 Hệ thống phân tích từ CCCD: Giới tính = {gioitinh_cccd}")
+        xac_nhan = input(f"Xác nhận giới tính là '{gioitinh_cccd}'? (y/n): ").strip().lower()
         if not xac_nhan or xac_nhan in ['y', 'yes']:
-            return gender_cccd
+            return gioitinh_cccd
     
     while True:
         gioi_tinh = input("Giới tính (Nam/Nữ/Khác): ").strip()
@@ -178,7 +178,7 @@ def nhap_thong_tin_diachi_tinh(cccd: str) -> str:
             error("Tỉnh/Thành phố không được để trống!")
             print("Vui lòng nhập lại!")
 
-def input_gender_with_validation() -> str:
+def input_gioitinh_with_validation() -> str:
     while True:
         gioi_tinh = input("Giới tính (Nam/Nữ/Khác): ").strip()
         if gioi_tinh in ['Nam', 'Nữ', 'Khác']:

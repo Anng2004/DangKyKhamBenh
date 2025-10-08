@@ -56,29 +56,29 @@ class Controller:
     ) -> None:
         from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gender_cccd, birth_year_cccd, province_new = phantich_cccd(so_cccd)
+        province_old, gioitinh_cccd, nam_sinh_cccd, province_new = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
         except:
             input_year = None
         
-        final_birth_year = birth_year_cccd if birth_year_cccd else input_year
+        final_nam_sinh = nam_sinh_cccd if nam_sinh_cccd else input_year
         
         final_province = province_new if province_new else province_old
         
-        if birth_year_cccd and birth_year_cccd != input_year:
-            self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {birth_year_cccd} (thay vì {input_year})")
+        if nam_sinh_cccd and nam_sinh_cccd != input_year:
+            self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {nam_sinh_cccd} (thay vì {input_year})")
         
         if final_province:
             self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {final_province}")
         
-        if gender_cccd and gender_cccd != gioi_tinh:
-            self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gender_cccd})")
+        if gioitinh_cccd and gioitinh_cccd != gioi_tinh:
+            self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gioitinh_cccd})")
         
         bn_id = self.model.bn_repo.create_enhanced(
             ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
-            final_birth_year, final_province
+            final_nam_sinh, final_province
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
         
@@ -93,29 +93,29 @@ class Controller:
     ) -> None:
         from utils.qr_utils import phantich_cccd, lay_thongtin_tinhmoi_tu_tinhcu
         
-        province_old, gender_cccd, birth_year_cccd, province_new = phantich_cccd(so_cccd)
+        province_old, gioitinh_cccd, nam_sinh_cccd, province_new = phantich_cccd(so_cccd)
         
         try:
             input_year = int(ngay_sinh_ddmmyyyy.split('/')[-1])
         except:
             input_year = None
         
-        final_birth_year = birth_year_cccd if birth_year_cccd else input_year
+        final_nam_sinh = nam_sinh_cccd if nam_sinh_cccd else input_year
         
         final_province = tinh if tinh else (province_new if province_new else province_old)
         
-        if birth_year_cccd and birth_year_cccd != input_year:
-            self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {birth_year_cccd} (thay vì {input_year})")
+        if nam_sinh_cccd and nam_sinh_cccd != input_year:
+            self.view.print_message(f"Tự động cập nhật năm sinh từ CCCD: {nam_sinh_cccd} (thay vì {input_year})")
         
         if not tinh and final_province:
             self.view.print_message(f"Tự động xác định tỉnh từ CCCD: {final_province}")
         
-        if gender_cccd and gender_cccd != gioi_tinh:
-            self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gender_cccd})")
+        if gioitinh_cccd and gioitinh_cccd != gioi_tinh:
+            self.view.print_message(f"Lưu ý: Giới tính nhập ({gioi_tinh}) khác với CCCD ({gioitinh_cccd})")
         
         bn_id = self.model.bn_repo.create_with_address(
             ho_ten, gioi_tinh, ngay_sinh_ddmmyyyy, so_cccd, 
-            phuong_xa, final_province, final_birth_year
+            phuong_xa, final_province, final_nam_sinh
         )
         self.view.print_message(f"Đã thêm bệnh nhân id={bn_id} và tạo tài khoản USER role (username = CCCD).")
 

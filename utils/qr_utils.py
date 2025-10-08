@@ -8,7 +8,7 @@ from .message_utils import error, warning, success, info, print_separator
 
 
 # Mã tỉnh thành phố (cũ - trước sắp xếp hành chính)
-PROVINCE_CODES = {
+ds_tinh_cu = {
     '001': 'Hà Nội',
     '002': 'Hà Giang', '004': 'Cao Bằng', '006': 'Bắc Kạn', '008': 'Tuyên Quang',
     '010': 'Lào Cai', '011': 'Điện Biên', '012': 'Lai Châu', '014': 'Sơn La',
@@ -30,7 +30,7 @@ PROVINCE_CODES = {
 
 # Mapping hành chính mới theo NQ 202/2025/QH15
 THONG_TIN_SAT_NHAP = {
-    "merged": [
+    "sat_nhap": [
         {"Don_vi_moi": "Tuyên Quang", "don_vi_truoc_sat_nhap": ["Hà Giang", "Tuyên Quang"]},
         {"Don_vi_moi": "Lào Cai", "don_vi_truoc_sat_nhap": ["Lào Cai", "Yên Bái"]},
         {"Don_vi_moi": "Thái Nguyên", "don_vi_truoc_sat_nhap": ["Bắc Kạn", "Thái Nguyên"]},
@@ -55,7 +55,7 @@ THONG_TIN_SAT_NHAP = {
         {"Don_vi_moi": "Cà Mau", "don_vi_truoc_sat_nhap": ["Bạc Liêu", "Cà Mau"]},
         {"Don_vi_moi": "An Giang", "don_vi_truoc_sat_nhap": ["Kiên Giang", "An Giang"]}
     ],
-    "unchanged": [
+    "giu_nguyen": [
         "Thành phố Hà Nội", "Cao Bằng", "Điện Biên", "Hà Tĩnh",
         "Lai Châu", "Lạng Sơn", "Nghệ An", "Quảng Ninh",
         "Thanh Hóa", "Sơn La", "Thành phố Huế"
@@ -76,7 +76,7 @@ def lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu: str) -> str:
         return don_vi_hanh_chinh_cu
         
     # Kiểm tra tỉnh không đổi
-    if don_vi_hanh_chinh_cu in THONG_TIN_SAT_NHAP['Giữ Nguyên']:
+    if don_vi_hanh_chinh_cu in THONG_TIN_SAT_NHAP['giu_nguyen']:
         return don_vi_hanh_chinh_cu
     
     # Xử lý các trường hợp đặc biệt
@@ -90,21 +90,21 @@ def lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu: str) -> str:
     }
     
     mapped_name = ten_day_du.get(don_vi_hanh_chinh_cu, don_vi_hanh_chinh_cu)
-    if mapped_name in THONG_TIN_SAT_NHAP['Giữ Nguyên']:
+    if mapped_name in THONG_TIN_SAT_NHAP['giu_nguyen']:
         return mapped_name
     
     # Tìm trong danh sách sáp nhập
-    for merged in THONG_TIN_SAT_NHAP['Sát Nhập']:
-        if mapped_name in merged['Sát nhập đơn vị']:
-            return merged['Đơn vị mới']
+    for sat_nhap in THONG_TIN_SAT_NHAP['sat_nhap']:
+        if mapped_name in sat_nhap['don_vi_truoc_sat_nhap']:
+            return sat_nhap['Don_vi_moi']
         # Kiểm tra các biến thể tên
-        for include in merged['Sát nhập đơn vị']:
+        for include in sat_nhap['don_vi_truoc_sat_nhap']:
             if (don_vi_hanh_chinh_cu == include or 
                 don_vi_hanh_chinh_cu == include.replace('Thành phố ', '') or
                 don_vi_hanh_chinh_cu == include.replace('TP.', '') or
                 f'Thành phố {don_vi_hanh_chinh_cu}' == include or
                 f'TP.{don_vi_hanh_chinh_cu}' == include):
-                return merged['Đơn vị mới']
+                return sat_nhap['Don_vi_moi']
     
     return don_vi_hanh_chinh_cu  # Trả về tên cũ nếu không tìm thấy
 
@@ -116,41 +116,41 @@ def phantich_cccd(cccd: str) -> Tuple[Optional[str], Optional[str], Optional[int
         cccd: Số CCCD 12 chữ số (VD: 079215000001)
     
     Returns:
-        Tuple[province_old, gender, birth_year, province_new] hoặc (None, None, None, None) nếu không hợp lệ
+        Tuple[province_old, gioitinh, nam_sinh, province_new] hoặc (None, None, None, None) nếu không hợp lệ
     """
     if not cccd or len(cccd) != 12 or not cccd.isdigit():
         return None, None, None, None
     
     try:
         # 3 số đầu: mã tỉnh
-        province_code = cccd[:3]
-        province_old = PROVINCE_CODES.get(province_code)
+        ma_tinh = cccd[:3]
+        ma_tinh_cu = ds_tinh_cu.get(ma_tinh)
         
         # Mapping sang tỉnh mới
-        province_new = lay_thongtin_tinhmoi_tu_tinhcu(province_old) if province_old else None
+        ma_tinh_moi = lay_thongtin_tinhmoi_tu_tinhcu(ma_tinh_cu) if ma_tinh_cu else None
         
         # Số thứ 4: mã giới tính và thế kỷ
-        gender_code = cccd[3]
-        if gender_code == '0':      # Nam thế kỷ 20
-            gender = 'Nam'
+        gioitinh_code = cccd[3]
+        if gioitinh_code == '0':      # Nam thế kỷ 20
+            gioitinh = 'Nam'
             century_base = 1900
-        elif gender_code == '1':    # Nữ thế kỷ 20
-            gender = 'Nữ'
+        elif gioitinh_code == '1':    # Nữ thế kỷ 20
+            gioitinh = 'Nữ'
             century_base = 1900
-        elif gender_code == '2':    # Nam thế kỷ 21
-            gender = 'Nam'
+        elif gioitinh_code == '2':    # Nam thế kỷ 21
+            gioitinh = 'Nam'
             century_base = 2000
-        elif gender_code == '3':    # Nữ thế kỷ 21
-            gender = 'Nữ'
+        elif gioitinh_code == '3':    # Nữ thế kỷ 21
+            gioitinh = 'Nữ'
             century_base = 2000
         else:
             return None, None, None, None
         
         # 2 số tiếp theo: năm sinh (2 chữ số cuối)
         year_suffix = int(cccd[4:6])
-        birth_year = century_base + year_suffix
+        nam_sinh = century_base + year_suffix
         
-        return province_old, gender, birth_year, province_new
+        return ma_tinh_cu, gioitinh, nam_sinh, ma_tinh_moi
         
     except (ValueError, IndexError):
         return None, None, None, None
@@ -214,14 +214,14 @@ class QRbenh_nhanInfo:
             
             ngay_sinh_clean = self.ngay_sinh.strip()
             
-            # Format 1: DDMMYYYY (8 digits) -> DD/MM/YYYY
+            # Format 1: DDMMYYYY (8 số) -> DD/MM/YYYY
             if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 8:
                 day = ngay_sinh_clean[:2]
                 month = ngay_sinh_clean[2:4]
                 year = ngay_sinh_clean[4:8]
                 return f"{day}/{month}/{year}"
             
-            # Format 2: DD/MM/YYYY (already formatted)
+            # Format 2: DD/MM/YYYY
             if '/' in ngay_sinh_clean and len(ngay_sinh_clean) == 10:
                 parts = ngay_sinh_clean.split('/')
                 if len(parts) == 3 and len(parts[0]) == 2 and len(parts[1]) == 2 and len(parts[2]) == 4:
@@ -233,7 +233,7 @@ class QRbenh_nhanInfo:
                 if len(parts) == 3 and len(parts[0]) == 2 and len(parts[1]) == 2 and len(parts[2]) == 4:
                     return f"{parts[0]}/{parts[1]}/{parts[2]}"
             
-            # Format 4: YYYY only -> 01/01/YYYY (default to Jan 1st)
+            # Format 4: YYYY only -> 01/01/YYYY (mặc định ngày 01/01)
             if ngay_sinh_clean.isdigit() and len(ngay_sinh_clean) == 4:
                 return f"01/01/{ngay_sinh_clean}"
             
@@ -272,10 +272,10 @@ def parse_qr_code(qr_string: str) -> Optional[QRbenh_nhanInfo]:
             error("Họ tên không được để trống")
             return None
         
-        extracted_province_old, extracted_gender, extracted_year, extracted_province_new = phantich_cccd(cccd)
+        extracted_province_old, extracted_gioitinh, extracted_year, extracted_province_new = phantich_cccd(cccd)
         
-        if not gioi_tinh and extracted_gender:
-            gioi_tinh = extracted_gender
+        if not gioi_tinh and extracted_gioitinh:
+            gioi_tinh = extracted_gioitinh
             success(f"Phân tích CCCD: Giới tính = {gioi_tinh}")
         
         if not ngay_sinh and extracted_year:
@@ -351,15 +351,15 @@ def display_benh_nhan_info(qr_info: QRbenh_nhanInfo) -> None:
     
     # Hiển thị thông tin phân tích từ CCCD
     print("\n📊 PHÂN TÍCH CCCD:")
-    province_old, gender, birth_year, province_new = phantich_cccd(qr_info.cccd)
+    province_old, gioitinh, nam_sinh, province_new = phantich_cccd(qr_info.cccd)
     if province_old:
         print(f"   🗺️  Nơi khai sinh (cũ): {province_old}")
     if province_new:
         print(f"   🗺️  Nơi khai sinh (mới): {province_new}")
-    if gender:
-        print(f"   👫 Giới tính (theo CCCD): {gender}")
-    if birth_year:
-        print(f"   🎂 Năm sinh (theo CCCD): {birth_year}")
+    if gioitinh:
+        print(f"   👫 Giới tính (theo CCCD): {gioitinh}")
+    if nam_sinh:
+        print(f"   🎂 Năm sinh (theo CCCD): {nam_sinh}")
     
     print_separator(60,"=")
 
