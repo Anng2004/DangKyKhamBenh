@@ -1,6 +1,6 @@
 # app.py
 from db import init_db
-from mvc import View, Model, Controller
+from DangKyKhamBenh.mvc import View, Model, Controller
 from repositories import UserRepo
 from datetime import datetime
 import os
@@ -1358,7 +1358,7 @@ class MenuManager:
     def menu_cap_nhat_du_lieu(self):
         """Cập nhật dữ liệu tỉnh sát nhập -  Thông tin bệnh nhân theo NQ 202/2025/QH15"""
         try:
-            from cap_nhat_don_vi_hanh_chinh import cap_nhat_tatca, kiemtra_trangthai_capnhat
+            from DangKyKhamBenh.DKKB_cap_nhat_don_vi_hanh_chinh import cap_nhat_tatca, kiemtra_trangthai_capnhat
             
             print("\n" + "="*60)
             print("🏛️  CẬP NHẬT DỮ LIỆU TỈNH SÁT NHẬP - THÔNG TIN BỆNH NHÂN (NQ 202/2025/QH15)")

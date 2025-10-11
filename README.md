@@ -292,7 +292,7 @@ cli_khambenh/
 
 │   ├── repositories.py     # Data access layer- 📈 **Data analysis**: Thống kê, ranking, tổng hợp
 
-│   └── mvc.py              # Controllers- 💾 **CSV fallback**: Tự động chuyển CSV nếu không có pandas
+│   └── DKKB_mvc              # Controllers- 💾 **CSV fallback**: Tự động chuyển CSV nếu không có pandas
 
 │- 🏷️ **Metadata**: Author, creation date, file info
 
@@ -521,7 +521,7 @@ cli_khambenh/
 │   ├── db.py               # Database connection & init
 │   ├── models.py           # ORM models với validation + TiepNhan with timestamps
 │   ├── repositories.py     # Data access layer + Enhanced medical history queries
-│   ├── mvc.py              # MVC controllers + Advanced medical history views
+│   ├── DKKB_mvc              # MVC controllers + Advanced medical history views
 │   └── validation_utils.py # Input validation helpers
 │
 ├── 🎯 Features  
@@ -555,7 +555,7 @@ cli_khambenh/
 ```
 
 ### 🆕 New Files (Recent Updates):
-- ✨ **Enhanced mvc.py**: Advanced medical history controllers with detail views
+- ✨ **Enhanced DKKB_mvc**: Advanced medical history controllers with detail views
 - ✨ **Updated models.py**: TiepNhan model with timestamp support
 - ✨ **Enhanced repositories.py**: Optimized queries for medical history
 - ✨ **report_utils.py**: Comprehensive reporting engine
