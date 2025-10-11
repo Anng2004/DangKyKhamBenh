@@ -1,12 +1,12 @@
 # import_data.py - Import dữ liệu mẫu cho hệ thống
 
 import sys
-from MSSQLServer import MSSQLConnection, InitDB
+from db import get_conn, init_db
 from utils.message_utils import error, success, warning, info, print_separator
 
 def kiem_tra_ton_tai_DB():
     try:
-        conn = MSSQLConnection()
+        conn = get_conn()
         cur = conn.cursor()
         
         cur.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME IN ('user', 'PhongKham', 'DM_DichVuKyThuat', 'BacSi')")

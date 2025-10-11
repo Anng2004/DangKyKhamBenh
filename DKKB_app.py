@@ -1,7 +1,6 @@
 # app.py
-from db import init_db
-from DangKyKhamBenh.mvc import View, Model, Controller
-from repositories import UserRepo
+from MSSQLServer import InitDB
+from DangKyKhamBenh.DKKB_mvc import View, Model, Controller
 from datetime import datetime
 import os
 
@@ -21,7 +20,7 @@ class MenuManager:
         self.current_user_id = current_user_id
         self.user_role = user_role
         self.username = username
-        self.user_repo = UserRepo()
+        self.user_repo = Model()
 
     def main_menu(self):
         if self.user_role.upper() == "ADMIN":
