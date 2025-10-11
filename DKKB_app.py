@@ -1,5 +1,3 @@
-# app.py
-#from MSSQLServer import InitDB
 from DKKB_mvc import Controller, Model, View
 from datetime import datetime
 import os
@@ -20,8 +18,10 @@ class MenuManager:
         self.current_user_id = current_user_id
         self.user_role = user_role
         self.username = username
-        self.user_repo = Model()
-
+        self.controller.view = View()
+        self.controller.model = Model()
+        self.controller.model.user_repo = self.controller.model.user_repo
+    # =============== MAIN MENUS ===============
     def main_menu(self):
         if self.user_role.upper() == "ADMIN":
             self.admin_main_menu()
@@ -854,8 +854,8 @@ class MenuManager:
                 error("Tên đăng nhập và mật khẩu mới không được để trống!")
                 return
             
-            from db import get_conn
-            conn = get_conn()
+            from MSSQLServer import MSSQLConnection
+            conn = conn()
             cur = conn.cursor()
             cur.execute("UPDATE [user] SET pass = ? WHERE username = ?", (new_password, username))
             if cur.rowcount > 0:
@@ -1394,18 +1394,15 @@ class MenuManager:
 
 
 def main():
-    init_db(seed=True)
-
+#    init_db(seed=True)
     view = View()
     model = Model()
     controller = Controller(view, model)
-    user_repo = UserRepo()
-
     print_header("HỆ THỐNG QUẢN LÝ KHÁM BỆNH - ĐĂNG NHẬP",60)
     username = input("👤 Username: ").strip()
     password = input("🔒 Password: ").strip()
     print(username, password)
-    user = user_repo.auth(username, password)
+    user = Controller.dang_nhap(controller, username, password)
 
     if not user:
         error("Sai tài khoản hoặc mật khẩu!")
@@ -1416,7 +1413,6 @@ def main():
     # khởi tạo menu
     menu_manager = MenuManager(controller, user._user_id, user._role, username)
     menu_manager.main_menu()
-
-
 if __name__ == "__main__":
     main()
+

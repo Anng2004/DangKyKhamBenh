@@ -4,7 +4,7 @@ cập nhật dữ liệu hành chính sát nhập (NQ 202/2025/QH15)
 """
 
 import json
-from db import get_conn
+from MSSQLServer import MSSQLConnection
 from datetime import datetime
 from utils.message_utils import error, success, warning, info, print_separator
 
@@ -72,7 +72,8 @@ def lay_thongtin_tinhmoi_tu_tinhcu(don_vi_hanh_chinh_cu: str) -> str:
     return don_vi_hanh_chinh_cu
 
 def CapNhat_BenhNhan_DonviHanhChinh():
-    conn = get_conn()
+    conn = MSSQLConnection(database="DangKyKhamBenh")
+    conn.connect()
     cur = conn.cursor()
     
     print("🔄 Bắt đầu cập nhật thông tin tỉnh - bệnh nhân...")
@@ -132,7 +133,8 @@ def cap_nhat_tatca():
     return True
 
 def kiemtra_trangthai_capnhat():
-    conn = get_conn()
+    conn = MSSQLConnection(database="DangKyKhamBenh")
+    conn.connect()
     cur = conn.cursor()
     
     try:

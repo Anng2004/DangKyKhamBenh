@@ -204,7 +204,8 @@ class ChiPhiKham:
 #====== Repositories =====
 class UserRepo:
     def get_by_username(self, username: str) -> Optional[AbcUser]:
-        conn = MSSQLConnection(database="DangKyKhamBenh");
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
         cur = conn.cursor()
         cur.execute("SELECT user_id, username, role FROM [user] WHERE username=?", (username,))
         r = cur.fetchone(); conn.close()
@@ -213,7 +214,9 @@ class UserRepo:
         return None
 
     def auth(self, username: str, password: str) -> Optional[AbcUser]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT user_id, username, role FROM [user] WHERE username=?", (username))
         r = cur.fetchone(); conn.close()
         if r:
@@ -223,7 +226,9 @@ class UserRepo:
 
 class PhongKhamRepo:
     def list_all(self) -> List[AbcPhongKham]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT pk.PK_ID, pk.MaPhong, pk.TenPhong, 
                    bs.BS_ID, bs.MaBacSi, bs.HoTen, bs.ChuyenKhoa, bs.SoDienThoai, bs.Email
@@ -242,7 +247,9 @@ class PhongKhamRepo:
         return result
 
     def get_by_ma(self, ma_phong: str) -> Optional[AbcPhongKham]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT pk.PK_ID, pk.MaPhong, pk.TenPhong, 
                    bs.BS_ID, bs.MaBacSi, bs.HoTen, bs.ChuyenKhoa, bs.SoDienThoai, bs.Email
@@ -260,7 +267,9 @@ class PhongKhamRepo:
 
     # --- CRUD tối thiểu cho Admin demo ---
     def create(self, ma_phong: str, ten_phong: str, user_created: str) -> str:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("INSERT INTO PhongKham(MaPhong, TenPhong, user_created) VALUES (?, ?, ?)", (ma_phong, ten_phong, user_created))
         conn.commit()
         # Get the newly created ID
@@ -270,7 +279,9 @@ class PhongKhamRepo:
         return str(row.PK_ID) if row else ""
 
     def delete_by_ma(self, ma_phong: str) -> int:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("DELETE FROM PhongKham WHERE MaPhong=?", (ma_phong,))
         conn.commit(); n = cur.rowcount; conn.close()
         return n
@@ -278,13 +289,17 @@ class PhongKhamRepo:
 
 class DichVuRepo:
     def list_all(self) -> List[AbcDichVu]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT dv_id, MaDichVu, TenDichVu, GiaDichVu FROM DM_DichVuKyThuat ORDER BY MaDichVu")
         rows = cur.fetchall(); conn.close()
         return [AbcDichVu(str(r.dv_id), r.MaDichVu, r.TenDichVu, r.GiaDichVu) for r in rows]
 
     def get_by_ma(self, ma_dv: str) -> Optional[AbcDichVu]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT dv_id, MaDichVu, TenDichVu, GiaDichVu FROM DM_DichVuKyThuat WHERE MaDichVu=?", (ma_dv,))
         r = cur.fetchone(); conn.close()
         if r: return AbcDichVu(str(r.dv_id), r.MaDichVu, r.TenDichVu, r.GiaDichVu)
@@ -292,7 +307,9 @@ class DichVuRepo:
 
     # --- CRUD tối thiểu cho Admin demo ---
     def create(self, ma_dv: str, ten_dv: str, gia: int, user_created: str) -> str:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("INSERT INTO DM_DichVuKyThuat(MaDichVu, TenDichVu, GiaDichVu, user_created) VALUES (?, ?, ?, ?)", (ma_dv, ten_dv, gia, user_created))
         conn.commit()
         # Get the newly created ID
@@ -302,7 +319,9 @@ class DichVuRepo:
         return str(row.dv_id) if row else ""
 
     def delete_by_ma(self, ma_dv: str) -> int:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("DELETE FROM DM_DichVuKyThuat WHERE MaDichVu=?", (ma_dv,))
         conn.commit(); n = cur.rowcount; conn.close()
         return n
@@ -324,7 +343,9 @@ class BenhNhanRepo:
     def _generate_pid() -> str:
         """Generate 8-digit PID: 2 digits for current year + 6 digits ordinal number"""
         import datetime
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         
         current_year = datetime.datetime.now().year
         year_suffix = str(current_year)[-2:]  # Last 2 digits of year
@@ -352,7 +373,9 @@ class BenhNhanRepo:
         ngay_sinh_ddmmyyyy: str,   # <-- THÊM
         so_cccd: str
     ) -> str:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
 
         # tạo PID
         pid = self._generate_pid()
@@ -392,7 +415,9 @@ class BenhNhanRepo:
         tinh: str = None
     ) -> str:
         """Tạo thông tin bệnh nhân từ chuỗi CCCD với các thông tin bổ sung như năm sinh và tỉnh"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
 
         # Tạo PID
         pid = self._generate_pid()
@@ -450,7 +475,9 @@ class BenhNhanRepo:
         nam_sinh: int = None
     ) -> str:
         """Create benh_nhan with full address information"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
 
         # Tạo PID
         pid = self._generate_pid()
@@ -489,7 +516,9 @@ class BenhNhanRepo:
         dia_chi: str
     ) -> str:
         """Create benh_nhan from QR code data with full address"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
 
         # Tạo PID
         pid = self._generate_pid()
@@ -529,7 +558,9 @@ class BenhNhanRepo:
         return bn_id
 
     def get_by_cccd(self, so_cccd: str) -> Optional[AbcBenhNhan]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT BN_ID, PID, HoTen, GioiTinh, YEAR(NgaySinh) as NamSinh, SoCCCD FROM BenhNhan WHERE SoCCCD = ?", (so_cccd,))
         r = cur.fetchone(); conn.close()
         if r:
@@ -540,13 +571,17 @@ class BenhNhanRepo:
 
     def exists_by_cccd(self, so_cccd: str) -> bool:
         """Check if benh_nhan with given CCCD already exists"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT COUNT(*) as count FROM BenhNhan WHERE SoCCCD = ?", (so_cccd,))
         r = cur.fetchone(); conn.close()
         return r.count > 0 if r else False
 
     def list_all(self) -> List[AbcBenhNhan]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("SELECT BN_ID, PID, HoTen, GioiTinh, YEAR(NgaySinh) as NamSinh, SoCCCD FROM BenhNhan ORDER BY HoTen")
         rows = cur.fetchall(); conn.close()
         result = []
@@ -561,7 +596,9 @@ class TiepNhanRepo:
     def _generate_ma_tn() -> str:
         """Generate ma_tn: TN + YYMMDD + 4-digit sequential number (e.g., TN2409240001)"""
         import datetime
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         
         now = datetime.datetime.now()
         date_prefix = now.strftime("%y%m%d")  # YYMMDD format
@@ -588,7 +625,9 @@ class TiepNhanRepo:
         
         # Auto-assign doctor from clinic if not specified
         if not bs_id:
-            conn = MSSQLConnection(); cur = conn.cursor()
+            conn = MSSQLConnection(database="DangKyKhamBenh")
+            conn.connect()
+            cur = conn.cursor()
             cur.execute("SELECT BS_ID FROM PhongKham WHERE PK_ID = ?", (pk_id,))
             row = cur.fetchone()
             if row and row.BS_ID:
@@ -596,7 +635,9 @@ class TiepNhanRepo:
             conn.close()
         
         bs_id_param = bs_id if bs_id else None
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             INSERT INTO TiepNhan(MaTiepNhan, BN_ID, LyDoKham, Dv_ID, PK_ID, BS_ID, user_created)
             VALUES (?, ?, ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
@@ -606,7 +647,9 @@ class TiepNhanRepo:
         return ma_tn  # Return the ma_tn code instead of TiepNhan_ID
 
     def list_all(self) -> List[AbcTiepNhan]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT tn.TiepNhan_ID, tn.MaTiepNhan, tn.LyDoKham,
                    bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
@@ -636,7 +679,9 @@ class TiepNhanRepo:
 
     def list_by_user(self, username: str) -> List[AbcTiepNhan]:
         """Lấy lịch sử tiếp nhận của một user cụ thể dựa trên username == CCCD bệnh nhân"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT tn.TiepNhan_ID, tn.MaTiepNhan, tn.LyDoKham,
                    bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
@@ -667,7 +712,9 @@ class TiepNhanRepo:
 
     def get_by_ma(self, ma_tn: str) -> Optional[AbcTiepNhan]:
         """Lấy thông tin tiếp nhận theo mã tiếp nhận"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT tn.TiepNhan_ID, tn.MaTiepNhan, tn.LyDoKham,
                    bn.BN_ID, bn.PID, bn.HoTen, bn.GioiTinh, YEAR(bn.NgaySinh) as NamSinh, bn.SoCCCD,
@@ -694,7 +741,9 @@ class TiepNhanRepo:
         return AbcTiepNhan(str(row.TiepNhan_ID), row.MaTiepNhan, bn, row.LyDoKham, dv, pk, bs)
 
     def delete_by_ma(self, ma_tn: str) -> int:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("DELETE FROM TiepNhan WHERE MaTiepNhan=?", (ma_tn,))
         conn.commit(); n = cur.rowcount; conn.close()
         return n
@@ -702,7 +751,9 @@ class TiepNhanRepo:
 
 class BacSiRepo:
     def create(self, ma_bs: str, ho_ten: str, chuyen_khoa: str, so_dt: str, email: str) -> str:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             INSERT INTO BacSi(MaBacSi, HoTen, ChuyenKhoa, SoDienThoai, Email, user_created)
             VALUES (?, ?, ?, ?, ?, (SELECT TOP 1 user_id FROM [user] WHERE role='ADMIN'))
@@ -715,7 +766,9 @@ class BacSiRepo:
         return str(row.BS_ID) if row else ""
 
     def list_all(self) -> List[AbcBacSi]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT bs.BS_ID, bs.MaBacSi, bs.HoTen, bs.ChuyenKhoa, bs.SoDienThoai, bs.Email
             FROM BacSi bs
@@ -730,7 +783,9 @@ class BacSiRepo:
         return result
 
     def get_by_ma(self, ma_bs: str) -> Optional[AbcBacSi]:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT bs.BS_ID, bs.MaBacSi, bs.HoTen, bs.ChuyenKhoa, bs.SoDienThoai, bs.Email
             FROM BacSi bs
@@ -744,7 +799,9 @@ class BacSiRepo:
 
     def get_by_phong_kham(self, ma_phong: str) -> List[AbcBacSi]:
         """Lấy bác sĩ của phòng khám"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("""
             SELECT bs.BS_ID, bs.MaBacSi, bs.HoTen, bs.ChuyenKhoa, bs.SoDienThoai, bs.Email
             FROM BacSi bs
@@ -761,14 +818,18 @@ class BacSiRepo:
         return result
 
     def delete_by_ma(self, ma_bs: str) -> int:
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         cur.execute("DELETE FROM BacSi WHERE MaBacSi=?", (ma_bs,))
         conn.commit(); n = cur.rowcount; conn.close()
         return n
 
     def assign_to_phong_kham(self, ma_bs: str, ma_phong: str) -> bool:
         """Gán bác sĩ vào phòng khám (cập nhật PhongKham.BS_ID)"""
-        conn = MSSQLConnection(); cur = conn.cursor()
+        conn = MSSQLConnection(database="DangKyKhamBenh")
+        conn.connect()
+        cur = conn.cursor()
         
         # lấy BS_ID từ ma_bs
         cur.execute("SELECT BS_ID FROM BacSi WHERE MaBacSi = ?", (ma_bs,))
@@ -786,4 +847,3 @@ class BacSiRepo:
         return success          
         conn.commit(); success = cur.rowcount > 0; conn.close()
         return success
-

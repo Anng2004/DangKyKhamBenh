@@ -1,13 +1,18 @@
 from __future__ import annotations
 from typing import List, Optional
-from DangKyKhamBenh.DKKB_TiepNhan import AbcTiepNhan, TiepNhanRepo, AbcBenhNhan, BenhNhanRepo, AbcPhongKham, PhongKhamRepo, AbcDichVu, DichVuRepo, ChiPhiKham, AbcBacSi, BacSiRepo
+from DKKB_TiepNhan import AbcTiepNhan, TiepNhanRepo, AbcBenhNhan, BenhNhanRepo, AbcPhongKham, PhongKhamRepo, AbcDichVu, DichVuRepo, ChiPhiKham, AbcBacSi, BacSiRepo, AbcUser, UserRepo
 from utils.qr_utils import parse_qr_code, display_benh_nhan_info, generate_username_from_qr, generate_password_from_qr, QRbenh_nhanInfo
+from DKKB_initDB_importdata import InitDB, Import_data
 # ===== MVC Components =====
 
 class View:
     @classmethod
     def print_list(cls, items: List[object]) -> None:
-        for it in items: print(it)
+        for it in items:
+            if hasattr(it, '__dict__'):
+                print({k: v for k, v in it.__dict__.items() if not k.startswith('_')})
+            else:
+                print(it)
 
     @classmethod
     def print_message(cls, msg: str) -> None:
@@ -21,6 +26,7 @@ class Model:
         self.dv_repo = DichVuRepo()
         self.tn_repo = TiepNhanRepo()
         self.bs_repo = BacSiRepo()
+        self.user_repo = UserRepo()
 
     # Thông tin danh sách bệnh nhân, phòng khám, dịch vụ, tiếp nhận, bác sĩ
     def ds_benh_nhan(self) -> List[AbcBenhNhan]:
@@ -40,12 +46,33 @@ class Model:
 
     def ds_bac_si(self) -> List[AbcBacSi]:
         return self.bs_repo.list_all()
-
+    def ds_user(self) -> List[AbcUser]:
+        return self.user_repo.list_all()
 class Controller:
     def __init__(self, view: View, model: Model):
         self.view = view
         self.model = model
+    def khoi_tao_db(self, seed: bool = True):
+        """Khởi tạo database và dữ liệu mẫu nếu cần."""
+        self.view.print_message("🔧 Đang khởi tạo database...")
+        try:
+            InitDB.init_db(seed)
+            if seed:
+                Import_data.main()
+            self.view.print_message("✅ Khởi tạo DB hoàn tất.")
+        except Exception as e:
+            self.view.print_message(f"❌ Lỗi khi khởi tạo DB: {e}")
 
+    # ===== Business Logic Methods =====
+
+    def dang_nhap(self, username: str, password: str) -> Optional[AbcUser]:
+        user = self.model.user_repo.auth(username, password)
+        if user:
+            self.view.print_message(f"Đăng nhập thành công! Chào mừng {user._username} ({user._role})")
+            return user
+        else:
+            self.view.print_message("Đăng nhập thất bại! Vui lòng kiểm tra lại username và password.")
+            return None
     def them_benh_nhan(
         self,
         ho_ten: str,
@@ -183,7 +210,8 @@ class Controller:
 
     def hien_thi_ds_benh_nhan(self):
         self.view.print_list(self.model.ds_benh_nhan())
-
+    def hien_thi_ds_user(self):
+        self.view.print_list(self.model.ds_user())
     def hien_thi_ds_phong_kham(self):
         self.view.print_list(self.model.ds_phong_kham())
 
@@ -522,3 +550,10 @@ class Controller:
         except Exception as e:
             self.view.print_message(f"❌ Lỗi: {e}")
             return None
+if __name__ == "__main__":
+    c = Controller(View(), Model())
+    c.khoi_tao_db(True)
+    c.hien_thi_ds_benh_nhan()
+    c.hien_thi_ds_phong_kham()
+    c.hien_thi_ds_dich_vu() 
+    
