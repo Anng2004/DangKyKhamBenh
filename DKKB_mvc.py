@@ -3,6 +3,7 @@ from typing import List, Optional
 from DKKB_TiepNhan import AbcTiepNhan, TiepNhanRepo, AbcBenhNhan, BenhNhanRepo, AbcPhongKham, PhongKhamRepo, AbcDichVu, DichVuRepo, ChiPhiKham, AbcBacSi, BacSiRepo, AbcUser, UserRepo
 from utils.qr_utils import parse_qr_code, display_benh_nhan_info, generate_username_from_qr, generate_password_from_qr, QRbenh_nhanInfo
 from DKKB_initDB_importdata import InitDB, Import_data
+from MSSQLServer import MSSQLConnection
 # ===== MVC Components =====
 
 class View:
@@ -52,6 +53,26 @@ class Controller:
     def __init__(self, view: View, model: Model):
         self.view = view
         self.model = model
+    def kiem_tra_ket_noi_sql(self) -> bool:
+        """Kiểm tra kết nối đến database."""
+        try:
+            conn = MSSQLConnection(database="master")
+            conn.connect()
+            conn.close()
+            self.view.print_message("✅ Kết nối sql thành công.")
+            return True
+        except Exception as e:
+            return False
+    def kiem_tra_ket_noi_db(self) -> bool:
+        """Kiểm tra kết nối đến database."""
+        try:
+            conn = MSSQLConnection(database="DangKyKhamBenh")
+            if not conn.connect():
+                return False
+            conn.close()
+            return True
+        except Exception as e:
+            return False
     def khoi_tao_db(self, seed: bool = True):
         """Khởi tạo database và dữ liệu mẫu nếu cần."""
         self.view.print_message("🔧 Đang khởi tạo database...")

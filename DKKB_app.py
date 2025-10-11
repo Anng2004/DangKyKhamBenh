@@ -1394,10 +1394,21 @@ class MenuManager:
 
 
 def main():
-#    init_db(seed=True)
+    # khởi tạo MVC
     view = View()
     model = Model()
     controller = Controller(view, model)
+    # kiểm tra kết nối DB và khơit tạo bảng nếu chưa có
+#    print("🔄 Đang kiểm tra kết nối sql...")
+#    if not controller.kiem_tra_ket_noi_sql():
+#       error("Không thể kết nối SQL Server. Vui lòng kiểm tra lại cấu hình kết nối trong file 'config.py'")
+#        return
+#    print("🔄 Đang kiểm tra kết nối database")
+#    if not controller.kiem_tra_ket_noi_db():
+    controller.khoi_tao_db()
+#    print("✅ Kết nối database thành công!")
+#    print("🔄 Đang khởi tạo bảng dữ liệu nếu chưa có...")
+    # đăng nhập
     print_header("HỆ THỐNG QUẢN LÝ KHÁM BỆNH - ĐĂNG NHẬP",60)
     username = input("👤 Username: ").strip()
     password = input("🔒 Password: ").strip()
