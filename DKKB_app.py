@@ -1,6 +1,6 @@
 # app.py
-from MSSQLServer import InitDB
-from DangKyKhamBenh.DKKB_mvc import View, Model, Controller
+#from MSSQLServer import InitDB
+from DKKB_mvc import Controller, Model, View
 from datetime import datetime
 import os
 

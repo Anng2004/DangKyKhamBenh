@@ -41,7 +41,6 @@ class Model:
     def ds_bac_si(self) -> List[AbcBacSi]:
         return self.bs_repo.list_all()
 
-#== Controller ==#
 class Controller:
     def __init__(self, view: View, model: Model):
         self.view = view

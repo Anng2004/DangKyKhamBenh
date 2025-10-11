@@ -86,7 +86,7 @@ if __name__ == "__main__":
     print(dt)
     conn.close()
 class InitDB:
-    @staticmethod
+    @classmethod
     def create_database_if_not_exists():
         try:
             import re
